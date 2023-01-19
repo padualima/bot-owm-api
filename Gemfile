@@ -39,6 +39,14 @@ gem "bootsnap", require: false
 group :development, :test do
   # See https://guides.rubyonrails.org/debugging_rails_applications.html#debugging-with-the-debug-gem
   gem "debug", platforms: %i[ mri mingw x64_mingw ]
+  # Use Pry as your rails console
+  gem 'pry-rails', '~> 0.3.3'
+  # Autoload dotenv in Rails.
+  gem 'dotenv-rails', '~> 2.1'
+  # rspec-rails is a testing framework for Rails 5+.
+  gem 'rspec-rails', '~> 6.0'
+  # factory_bot_rails provides integration between factory_bot and rails 5.0 or newer
+  gem 'factory_bot_rails', '~> 6.2'
 end
 
 group :development do
