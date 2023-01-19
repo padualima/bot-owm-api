@@ -30,6 +30,13 @@ gem "tzinfo-data", platforms: %i[ mingw mswin x64_mingw jruby ]
 # Reduces boot times through caching; required in config/boot.rb
 gem "bootsnap", require: false
 
+# HTTP/REST API client library.
+gem 'faraday', '~> 2.7'
+# The fastest JSON parser and object serializer.
+# gem 'oj', '~> 2.9'
+# An abstract OAuth2 strategy for OmniAuth.
+# gem 'omniauth-oauth2'
+# gem 'omniauth-twitter2'
 # Use Active Storage variants [https://guides.rubyonrails.org/active_storage_overview.html#transforming-images]
 # gem "image_processing", "~> 1.2"
 
