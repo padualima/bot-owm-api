@@ -1,6 +1,13 @@
-Rails.application.routes.draw do
-  # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html
+require 'api_constraints'
 
-  # Defines the root path route ("/")
+class ActionDispatch::Routing::Mapper
+  def draw(version)
+    instance_eval(File.read(Rails.root.join("config/routes/#{version}.rb")))
+  end
+end
+
+Rails.application.routes.draw do
+  draw :v1
+
   # root "articles#index"
 end
