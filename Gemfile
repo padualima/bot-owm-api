@@ -52,6 +52,8 @@ group :development, :test do
   gem 'dotenv-rails', '~> 2.1'
   # rspec-rails is a testing framework for Rails 5+.
   gem 'rspec-rails', '~> 6.0'
+  # Set of matchers and helpers to allow you test your APIs responses like a pro.
+  gem 'rspec-json_expectations', '~> 2.2'
   # factory_bot_rails provides integration between factory_bot and rails 5.0 or newer
   gem 'factory_bot_rails', '~> 6.2'
 end
