@@ -7,5 +7,8 @@ module V1
 
       render json: { data: { message: authorize_url } }.to_json
     end
+
+    def callback
+    end
   end
 end
