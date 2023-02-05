@@ -2,9 +2,13 @@ scope module: :v1, defaults: { format: :json }, constraints: ApiConstraints.new(
   scope module: :sessions do
     get 'authorize'
   end
-  get 'auths/:provider/callback', to: 'session#callback'
-  get '/authorize', to: 'sessions#authorize'
-  # get 'auths/:provider/callback', to: 'sessions#create'
+
+  get 'auths/:provider/callback',
+    to: 'sessions#callback',
+    as: :callback,
+    constraints: TwitterCallbackConstraints.new
+
+  resources :tweets, only: %i[create]
 end
 
 
