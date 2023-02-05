@@ -17,11 +17,13 @@ RSpec.describe "V1::Sessions", type: :request do
 
     it "return a mesasge data with valid authorize_url" do
       code_verifier = Helpers.generate_code_verifier
-      code_challenge = Helpers.generate_code_challenge
+      code_challenge = Helpers.generate_code_challenge(code_verifier)
       authorize_url = Helpers.generate_authorize_url(code_verifier, code_challenge)
 
       allow(Clients::Twitter::Utils::PKCE).to receive(:code_verifier).and_return(code_verifier)
-      allow(Clients::Twitter::Utils::PKCE).to receive(:code_challenge).and_return(code_challenge)
+      allow(Clients::Twitter::Utils::PKCE).to receive(:code_challenge)
+        .with(code_verifier)
+        .and_return(code_challenge)
 
       get "/authorize"
 

@@ -7,7 +7,7 @@ module Clients
         end
         module_function :code_verifier
 
-        def code_challenge
+        def code_challenge(code_verifier)
           urlsafe_base64(Digest::SHA256.base64digest(code_verifier))
         end
         module_function :code_challenge

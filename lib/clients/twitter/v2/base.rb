@@ -7,7 +7,9 @@ module Clients
       class Base
         include Utils
 
-        attr_reader :client_id, :client_secret, :access_token
+        attr_reader :client_id, :client_secret
+
+        attr_accessor :oauth_token
 
         def initialize(options = {})
           @client_id = ENV['TWITTER_CLIENT_ID']
@@ -23,17 +25,19 @@ module Clients
         private
 
         def client
-          @client ||= Faraday.new(api_endpoint) do |client|
+          @client ||= Faraday.new(domain) do |client|
             client.request :json
             client.response :json
             client.adapter Faraday.default_adapter
-            client.headers['Authorization'] = "Bearer #{access_token}" if oauth_token.present?
+            client.headers['Authorization'] = "Bearer #{oauth_token}" if oauth_token.present?
           end
         end
 
         def call(method:, endpoint:, params: {}, body: {}, extra_headers: {})
+          body = body.present? ? body.to_json : nil
+
           client.params = params
-          client.public_send(method, endpoint, body.to_json, extra_headers)
+          client.public_send(method, endpoint, body, extra_headers)
         end
       end
     end

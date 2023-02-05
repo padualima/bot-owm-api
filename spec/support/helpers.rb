@@ -6,8 +6,8 @@ module Helpers
   end
   module_function :generate_code_verifier
 
-  def generate_code_challenge
-    Clients::Twitter::Utils::PKCE.code_challenge
+  def generate_code_challenge(code_verifier)
+    Clients::Twitter::Utils::PKCE.code_challenge(code_verifier)
   end
   module_function :generate_code_challenge
 
