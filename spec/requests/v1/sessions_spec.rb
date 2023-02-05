@@ -30,4 +30,11 @@ RSpec.describe "V1::Sessions", type: :request do
       expect(response.parsed_body["data"]["message"]).to eql(authorize_url)
     end
   end
+
+  describe "GET /callback" do
+    context "receive twitter callback" do
+      it 'return create user with access_token'
+      it 'find user and update access_token'
+    end
+  end
 end
