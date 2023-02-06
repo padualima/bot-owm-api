@@ -37,39 +37,75 @@ RSpec.describe "V1::Sessions", type: :request do
       let(:code) { SecureRandom.hex(10) }
       let(:twitter_callback) { callback_path(:twitter2, code: code, state: state) }
 
-      context "invalid authorization code" do
-        it 'return unprocessable en`tity' do
+      context "when invalid authorization code" do
+        it "return unprocessable entity" do
           get twitter_callback
 
           expect(response).to have_http_status(:unprocessable_entity)
         end
       end
 
-      context "valid authorization code" do
-        before do
-          allow_any_instance_of(Faraday::Connection).to receive(:post)
-            .and_return(
-              instance_double(Faraday::Response, body: Helpers.access_token_response, status: 200)
-            )
+      context "when valid authorization code" do
+        context "when the user not exist" do
+          before do
+            allow_any_instance_of(Faraday::Connection).to receive(:post)
+              .and_return(
+                instance_double(Faraday::Response, body: Helpers.access_token_response, status: 200)
+              )
 
-          allow_any_instance_of(Faraday::Connection).to receive(:get)
-            .and_return(
-              instance_double(Faraday::Response, body: Helpers.me_response, status: 200)
-            )
+            allow_any_instance_of(Faraday::Connection).to receive(:get)
+              .and_return(
+                instance_double(Faraday::Response, body: Helpers.me_response, status: 200)
+              )
+          end
+
+          it "return a token data" do
+            get twitter_callback
+
+            expect(response.parsed_body).to include_json({ data: { token: a_kind_of(String) } })
+          end
+
+          it "return a create user and api_token_event" do
+            expect { get twitter_callback }.to change(User, :count).by(1)
+              .and change(ApiTokenEvent, :count).by(1)
+          end
         end
 
-        it 'return a token data' do
-          get twitter_callback
+        context "when the user already exists" do
+          let(:api_token_event) { create(:api_token_event) }
 
-          expect(response.parsed_body).to include_json({ data: { token: a_kind_of(String) } })
+          before do
+            allow_any_instance_of(Faraday::Connection).to receive(:post)
+              .and_return(
+                instance_double(
+                  Faraday::Response,
+                  body: Helpers.access_token_response(api_token_event.access_token),
+                  status: 200
+                )
+              )
+
+            allow_any_instance_of(Faraday::Connection).to receive(:get)
+              .and_return(
+                instance_double(
+                  Faraday::Response,
+                  body: Helpers.me_response(api_token_event.user.id),
+                  status: 200
+                )
+              )
+          end
+
+          it "return new token" do
+            get twitter_callback
+
+            response_body = response.parsed_body
+
+            fetch_api_token_event = ApiTokenEvent.find_by(token: response_body['data']['token'])
+
+            expect(response_body).to include_json({ data: { token: a_kind_of(String) } })
+            expect(fetch_api_token_event.user.id).to eql(api_token_event.user.id)
+            expect(fetch_api_token_event.id).to eql(api_token_event.id.succ)
+          end
         end
-
-        it 'return a create user and api_token_event' do
-          expect { get twitter_callback }.to change(User, :count).by(1)
-            .and change(ApiTokenEvent, :count).by(1)
-        end
-
-        it 'return access_token and find user and update'
       end
     end
 

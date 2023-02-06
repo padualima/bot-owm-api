@@ -18,11 +18,11 @@ module Helpers
   end
   module_function :generate_authorize_url
 
-  def access_token_response
+  def access_token_response(access_token=SecureRandom.hex(10))
     {
       token_type: "bearer",
       expires_in: 7200,
-      access_token: SecureRandom.hex(10),
+      access_token: access_token,
       scope: "tweet.write users.read tweet.read offline.access",
       refresh_token: SecureRandom.hex(10)
     }.as_json
@@ -30,10 +30,10 @@ module Helpers
   module_function :access_token_response
 
 
-  def me_response
+  def me_response(id=SecureRandom.rand(10000..20000))
     {
       data: {
-        id: SecureRandom.rand(10000..20000),
+        id: id,
         name: Faker::Name.name,
         username: Faker::Internet.username(specifier: 5..10)
       }

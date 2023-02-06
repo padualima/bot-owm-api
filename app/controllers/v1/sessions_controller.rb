@@ -13,15 +13,20 @@ module V1
 
       return head :unprocessable_entity unless oauth.status.eql?(200)
 
-      expires_in = oauth.body['expires_in'].minutes.from_now
+      oauth.body.merge!('expires_in' => oauth.body['expires_in'].minutes.from_now)
 
       token = ActiveRecord::Base.transaction do
-        api_token_input =
-          oauth.body.merge(expires_in: expires_in, token: ApiTokenEvent.token_generator)
+        api_token_event = ApiTokenEvent.find_by(access_token:  oauth.body['access_token'])
 
-        user_api_token = User
-          .new(user_lookup_data(oauth.body['access_token']))
-          .then { |user| user.api_token_events.new(api_token_input) }
+        user = if api_token_event # add AASM to inactive
+          api_token_event.update(expires_in: Time.current)
+          api_token_event.user
+        else
+          User.new(user_lookup_data(oauth.body))
+        end
+
+        user
+          .then { |user| user.api_token_events.new(oauth.body) }
           .then { |user_api_token| user_api_token.token if user_api_token.save! }
       end
 
