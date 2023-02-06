@@ -1,7 +1,7 @@
 FactoryBot.define do
   factory :user do
-    uuid { "MyString" }
-    name { "MyString" }
-    username { "MyString" }
+    uid { Faker::Number.number.to_s }
+    name { Faker::Name.name }
+    username { Faker::Internet.user_name }
   end
 end
