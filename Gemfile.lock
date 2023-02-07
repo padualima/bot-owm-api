@@ -214,7 +214,7 @@ DEPENDENCIES
   rails (~> 7.0.4)
   rspec-json_expectations (~> 2.2)
   rspec-rails (~> 6.0)
-  shoulda-matchers (~> 5.0)
+  shoulda-matchers (~> 5.3)
   tzinfo-data
 
 RUBY VERSION
