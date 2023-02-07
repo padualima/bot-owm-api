@@ -52,6 +52,8 @@ group :development, :test do
   gem 'rspec-json_expectations', '~> 2.2'
   # factory_bot_rails provides integration between factory_bot and rails 5.0 or newer
   gem 'factory_bot_rails', '~> 6.2'
+  # Simple one-liner tests for common Rails functionality
+  gem 'shoulda-matchers', '~> 5.0'
   # Faker, a port of Data::Faker from Perl, is used to easily generate fake data: names, addresses..
   gem 'faker', '~> 3.1', '>= 3.1.1'
 end
