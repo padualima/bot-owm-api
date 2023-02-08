@@ -13,16 +13,18 @@ module V1
 
       return head :unprocessable_entity unless oauth.status.eql?(200)
 
-      oauth.body.merge!('expires_in' => oauth.body['expires_in'].minutes.from_now)
+      oauth.body.merge!(
+        'expires_in' => oauth.body['expires_in'].minutes.from_now,
+        'token' => ApiTokenGenerator.call(oauth.body['access_token'])
+      )
 
       token = ActiveRecord::Base.transaction do
-        api_token_event = ApiTokenEvent.find_by(access_token:  oauth.body['access_token'])
+        fetch_user_info = user_lookup_data(oauth.body['access_token'])
 
-        user = if api_token_event # add AASM to inactive
-          api_token_event.update(expires_in: Time.current)
-          api_token_event.user
-        else
-          User.new(user_lookup_data(oauth.body))
+        user = User.find_by(uid: fetch_user_info['uid']) || User.new(fetch_user_info)
+
+        if user.api_token_events.present?
+          user.api_token_events.last.update(expires_in: Time.current) # ADD AASM TO GET ACTIVE
         end
 
         user
@@ -36,12 +38,12 @@ module V1
     private
 
     def user_lookup_data(access_token)
-      user_info = Clients::Twitter::V2::Users::Lookup
+      Clients::Twitter::V2::Users::Lookup
         .new { |config| config.oauth_token = access_token }
         .me
-
-      user_info.body['data']['uid'] = user_info.body['data'].delete('id')
-      user_info.body['data']
+        .then do |user_info|
+          user_info.body['data'].merge('uid' => user_info.body['data'].delete('id'))
+        end
     end
   end
 end

@@ -73,13 +73,15 @@ RSpec.describe "V1::Sessions", type: :request do
 
         context "when the user already exists" do
           let(:api_token_event) { create(:api_token_event) }
+          let(:user) { api_token_event.user }
+          let(:new_api_token_event) { build(:api_token_event, user: user) }
 
           before do
             allow_any_instance_of(Faraday::Connection).to receive(:post)
               .and_return(
                 instance_double(
                   Faraday::Response,
-                  body: Helpers.access_token_response(api_token_event.access_token),
+                  body: Helpers.access_token_response(new_api_token_event.access_token),
                   status: 200
                 )
               )
@@ -88,7 +90,7 @@ RSpec.describe "V1::Sessions", type: :request do
               .and_return(
                 instance_double(
                   Faraday::Response,
-                  body: Helpers.me_response(api_token_event.user.id),
+                  body: Helpers.me_response(user.uid),
                   status: 200
                 )
               )

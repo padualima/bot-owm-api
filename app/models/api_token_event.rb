@@ -1,10 +1,8 @@
 class ApiTokenEvent < ApplicationRecord
-  before_save :generate_token
 
   belongs_to :user
   has_many :tweets
 
-  def generate_token
-    self.token ||= BCrypt::Password.create(access_token)
-  end
+  validates :token_type, :expires_in, :access_token, :scope, :token, presence: true
+  validates :access_token, :refresh_token, :token, uniqueness: true
 end
