@@ -18,6 +18,6 @@ RSpec.describe ApiTokenEvent, type: :model do
     it { should validate_uniqueness_of(:refresh_token) }
     it { should validate_uniqueness_of(:token) }
     it { should_not allow_value(Time.current - 1.minute).for(:expires_in) }
-    it { should allow_value(Time.current + 10.minute).for(:expires_in) }
+    it { should allow_value(Time.current + 1.minute).for(:expires_in) }
   end
 end

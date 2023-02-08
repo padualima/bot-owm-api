@@ -13,22 +13,21 @@ module V1
 
       return head :unprocessable_entity unless oauth.status.eql?(200)
 
-      oauth.body.merge!(
+      input_api_token = oauth.body.merge(
         'expires_in' => oauth.body['expires_in'].minutes.from_now,
         'token' => ApiTokenGenerator.call(oauth.body['access_token'])
       )
 
       token = ActiveRecord::Base.transaction do
-        fetch_user_info = user_lookup_data(oauth.body['access_token'])
-
+        fetch_user_info = user_lookup_data(input_api_token['access_token'])
         user = User.find_by(uid: fetch_user_info['uid']) || User.new(fetch_user_info)
 
         if user.api_token_events.present?
-          user.api_token_events.last.update(expires_in: Time.current) # ADD AASM TO GET ACTIVE
+          user.api_token_events.last.update!(expires_in: Time.current)
         end
 
         user
-          .then { |user| user.api_token_events.new(oauth.body) }
+          .then { |user| user.api_token_events.new(input_api_token) }
           .then { |user_api_token| user_api_token.token if user_api_token.save! }
       end
 
