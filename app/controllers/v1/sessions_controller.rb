@@ -22,9 +22,7 @@ module V1
         fetch_user_info = user_lookup_data(input_api_token['access_token'])
         user = User.find_by(uid: fetch_user_info['uid']) || User.new(fetch_user_info)
 
-        if user.api_token_events.present?
-          user.api_token_events.last.update!(expires_in: Time.current)
-        end
+        user.latest_valid_api_token&.update!(expires_in: Time.current)
 
         user
           .then { |user| user.api_token_events.new(input_api_token) }
