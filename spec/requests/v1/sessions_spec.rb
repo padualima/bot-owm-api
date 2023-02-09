@@ -50,12 +50,20 @@ RSpec.describe "V1::Sessions", type: :request do
           before do
             allow_any_instance_of(Faraday::Connection).to receive(:post)
               .and_return(
-                instance_double(Faraday::Response, body: Helpers.access_token_response, status: 200)
+                instance_double(
+                  Faraday::Response,
+                  body: MockTwitterResponse::OAuth2.access_token_data,
+                  status: 200
+                )
               )
 
             allow_any_instance_of(Faraday::Connection).to receive(:get)
               .and_return(
-                instance_double(Faraday::Response, body: Helpers.me_response, status: 200)
+                instance_double(
+                  Faraday::Response,
+                  body: MockTwitterResponse::Users.me_data,
+                  status: 200
+                )
               )
           end
 
@@ -75,13 +83,14 @@ RSpec.describe "V1::Sessions", type: :request do
           let(:api_token_event) { create(:api_token_event) }
           let(:user) { api_token_event.user }
           let(:new_api_token_event) { build(:api_token_event, user: user) }
+          let(:access_token) { new_api_token_event.access_token }
 
           before do
             allow_any_instance_of(Faraday::Connection).to receive(:post)
               .and_return(
                 instance_double(
                   Faraday::Response,
-                  body: Helpers.access_token_response(new_api_token_event.access_token),
+                  body: MockTwitterResponse::OAuth2.access_token_data(access_token),
                   status: 200
                 )
               )
@@ -90,7 +99,7 @@ RSpec.describe "V1::Sessions", type: :request do
               .and_return(
                 instance_double(
                   Faraday::Response,
-                  body: Helpers.me_response(user.uid),
+                  body: MockTwitterResponse::Users.me_data(user.uid),
                   status: 200
                 )
               )

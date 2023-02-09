@@ -17,27 +17,4 @@ module Helpers
     "read+users.read+tweet.write+offline.access&response_type=code&code_challenge_method=S256"
   end
   module_function :generate_authorize_url
-
-  def access_token_response(access_token=SecureRandom.hex(10))
-    {
-      token_type: "bearer",
-      expires_in: 7200,
-      access_token: access_token,
-      scope: "tweet.write users.read tweet.read offline.access",
-      refresh_token: SecureRandom.hex(10)
-    }.as_json
-  end
-  module_function :access_token_response
-
-
-  def me_response(id=SecureRandom.rand(10000..20000))
-    {
-      data: {
-        id: id,
-        name: Faker::Name.name,
-        username: Faker::Internet.username(specifier: 5..10)
-      }
-    }.as_json
-  end
-  module_function :me_response
 end

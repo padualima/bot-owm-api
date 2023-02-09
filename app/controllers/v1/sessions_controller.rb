@@ -36,7 +36,7 @@ module V1
 
     def user_lookup_data(access_token)
       Clients::Twitter::V2::Users::Lookup
-        .new { |config| config.oauth_token = access_token }
+        .new(oauth_token: access_token)
         .me
         .then do |user_info|
           user_info.body['data'].merge('uid' => user_info.body['data'].delete('id'))
