@@ -1,13 +1,11 @@
 # frozen_string_literal: true
+
 require_relative 'v2/base'
 require_relative 'utils'
 
 module Clients
   module Twitter
     class OAuth2 < V2::Base
-
-      attr_reader :code_verifier, :code_challenge
-
       include Utils
 
       def authorize_url
@@ -22,8 +20,7 @@ module Clients
         }
         .map { |k,v| [k,v].join('=') }
         .join('&')
-
-        ["https://twitter.com/i/oauth2/authorize", params].join('?')
+        .then { |params| "#{ENV['TWITTER_AUTHORIZE_URL']}?#{params}" }
       end
 
       def access_token(state, code)
@@ -44,19 +41,13 @@ module Clients
         )
       end
 
-      def code_verifier
-        @code_verifier ||= PKCE.code_verifier
-      end
-
-      def code_challenge
-        @code_challenge ||= PKCE.code_challenge(code_verifier)
-      end
-
       private
 
-      def basic_token
-        Base64.urlsafe_encode64("#{client_id}:#{client_secret}")
-      end
+      def code_verifier = PKCE.code_verifier
+
+      def code_challenge = PKCE.code_challenge(code_verifier)
+
+      def basic_token = Base64.urlsafe_encode64("#{client_id}:#{client_secret}")
     end
   end
 end

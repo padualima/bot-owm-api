@@ -4,17 +4,12 @@ module Clients
   module Twitter
     module V2
       module Utils
-        def domain
-          @domain ||= "https://api.twitter.com/2".freeze
-        end
+        def twitter_base_url = ENV['TWITTER_BASE_URL_V2']
 
-        def callback_url
-          @callback_url ||= ENV['TWITTER_CALLBACK_URL']
-        end
+        def callback_url = ENV['TWITTER_CALLBACK_URL']
 
-        def scopes
-          ["tweet.read", "users.read", "tweet.write", "offline.access"].join('+')
-        end
+        def scopes = ["tweet.read", "users.read", "tweet.write", "offline.access"].join('+')
+        module_function :scopes
       end
     end
   end

@@ -21,7 +21,7 @@ describe Clients::Twitter::V2::Tweets::ManageTweets do
           .and_return(
             instance_double(
               Faraday::Response,
-              body: MockTwitterResponse::Tweets.new_tweet_data(text),
+              body: MockTwitterResponse::Tweets.new_tweet_data(text: text),
               status: 200
             )
           )

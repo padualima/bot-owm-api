@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 FactoryBot.define do
   factory :tweet do
     api_token_event factory: :api_token_event

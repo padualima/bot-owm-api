@@ -18,7 +18,8 @@ RSpec.describe "V1::Sessions", type: :request do
     it "return a mesasge data with valid authorize_url" do
       code_verifier = Helpers.generate_code_verifier
       code_challenge = Helpers.generate_code_challenge(code_verifier)
-      authorize_url = Helpers.generate_authorize_url(code_verifier, code_challenge)
+      authorize_url = Helpers
+        .generate_authorize_url(state: code_verifier, code_challenge: code_challenge)
 
       allow(Clients::Twitter::Utils::PKCE).to receive(:code_verifier).and_return(code_verifier)
       allow(Clients::Twitter::Utils::PKCE).to receive(:code_challenge)
@@ -90,7 +91,7 @@ RSpec.describe "V1::Sessions", type: :request do
               .and_return(
                 instance_double(
                   Faraday::Response,
-                  body: MockTwitterResponse::OAuth2.access_token_data(access_token),
+                  body: MockTwitterResponse::OAuth2.access_token_data(access_token: access_token),
                   status: 200
                 )
               )
@@ -99,7 +100,7 @@ RSpec.describe "V1::Sessions", type: :request do
               .and_return(
                 instance_double(
                   Faraday::Response,
-                  body: MockTwitterResponse::Users.me_data(user.uid),
+                  body: MockTwitterResponse::Users.me_data(id: user.uid),
                   status: 200
                 )
               )
