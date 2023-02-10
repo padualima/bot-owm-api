@@ -8,6 +8,10 @@ class ApiTokenEvent < ApplicationRecord
   validate :check_if_expired, if: -> { expires_in.present? }, on: :create
 
   def check_if_expired
-    errors.add(:expires_in, "expiration date not allowed") if expires_in < Time.current
+    errors.add(:expires_in, "expiration date not allowed") if expired?
+  end
+
+  def expired?
+    expires_in < Time.current
   end
 end

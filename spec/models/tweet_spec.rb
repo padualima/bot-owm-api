@@ -18,4 +18,20 @@ RSpec.describe Tweet, type: :model do
     it { should allow_value(Faker::Number.number.to_s).for(:uid) }
     it { should allow_value(Faker::Number.number).for(:uid) }
   end
+
+  describe "#expired?" do
+    let(:api_token_event) { build(:api_token_event) }
+
+    context "when valid token" do
+      it { expect(api_token_event).to be_valid }
+    end
+
+    context "when expired token" do
+      before do
+        api_token_event.update(expires_in: Time.current)
+      end
+
+      it { expect(api_token_event).not_to be_valid }
+    end
+  end
 end
