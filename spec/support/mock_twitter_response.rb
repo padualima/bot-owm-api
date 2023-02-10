@@ -28,12 +28,12 @@ module MockTwitterResponse
   module Tweets
     def self.new_tweet_data(text: Faker::Lorem.sentence)
       {
-        "data" => {
-          "edit_history_tweet_ids"=>[SecureRandom.rand(100000..900000).to_s],
-          "id"=>SecureRandom.rand(100000..900000).to_s,
-          "text"=>text
+        data: {
+          edit_history_tweet_ids: [SecureRandom.rand(100000..900000).to_s],
+          id: SecureRandom.rand(100000..900000).to_s,
+          text: text
         }
-      }
+      }.as_json
     end
   end
 end
