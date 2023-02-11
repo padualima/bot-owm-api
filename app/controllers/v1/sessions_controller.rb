@@ -15,7 +15,7 @@ module V1
 
       input_api_token = oauth.body.merge(
         'expires_in' => oauth.body['expires_in'].minutes.from_now,
-        'token' => ApiTokenGenerator.call(oauth.body['access_token'])
+        'token' => ApiTokenGenerator.call(access_token: oauth.body['access_token'])
       )
 
       token = ActiveRecord::Base.transaction do
