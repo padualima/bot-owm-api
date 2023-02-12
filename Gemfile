@@ -33,6 +33,9 @@ gem "bootsnap", require: false
 # HTTP/REST API client library.
 gem 'faraday', '~> 2.7'
 
+# Complete Ruby geocoding solution.
+gem 'geocoder', '~> 1.8'
+
 # Use Active Storage variants [https://guides.rubyonrails.org/active_storage_overview.html#transforming-images]
 # gem "image_processing", "~> 1.2"
 
@@ -55,7 +58,7 @@ group :development, :test do
   # Simple one-liner tests for common Rails functionality
   gem 'shoulda-matchers', '~> 5.3'
   # Faker, a port of Data::Faker from Perl, is used to easily generate fake data: names, addresses..
-  gem 'faker', '~> 3.1', '>= 3.1.1'
+  gem 'faker', '~> 3.1'
 end
 
 group :development do
