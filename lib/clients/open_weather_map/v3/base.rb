@@ -4,11 +4,13 @@ module Clients
   module OpenWeatherMap
     module V3
       module Base
-        def self.api_key = ENV['OPEN_WEATHER_MAP_API_KEY']
+        extend self
 
-        def self.api_url = ENV['OPEN_WEATHER_MAP_API_URL']
+        def api_key = ENV['OPEN_WEATHER_MAP_API_KEY']
 
-        def self.client
+        def api_url = ENV['OPEN_WEATHER_MAP_API_URL']
+
+        def client
           Faraday.new(api_url) do |client|
             client.request :json
             client.response :json
@@ -16,7 +18,7 @@ module Clients
           end
         end
 
-        def self.call(method:, endpoint:, body: {})
+        def call(method:, endpoint:, body: {})
           body = body.merge!(appid: api_key).as_json
 
           client.public_send(method, endpoint, body)

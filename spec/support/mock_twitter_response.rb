@@ -2,7 +2,9 @@
 
 module MockTwitterResponse
   module OAuth2
-    def self.access_token_data(access_token: SecureRandom.hex(10))
+    extend self
+
+    def access_token_data(access_token: SecureRandom.hex(10))
       {
         token_type: "bearer",
         expires_in: 7200,
@@ -14,7 +16,9 @@ module MockTwitterResponse
   end
 
   module Users
-    def self.me_data(id: SecureRandom.rand(10000..20000))
+    extend self
+
+    def me_data(id: SecureRandom.rand(10000..20000))
       {
         data: {
           id: id,
@@ -26,7 +30,9 @@ module MockTwitterResponse
   end
 
   module Tweets
-    def self.new_tweet_data(text: Faker::Lorem.sentence)
+    extend self
+
+    def new_tweet_data(text: Faker::Lorem.sentence)
       {
         data: {
           edit_history_tweet_ids: [SecureRandom.rand(100000..900000).to_s],

@@ -1,7 +1,9 @@
 # frozen_string_literal: true
 
 module MockOpenWeatherMapResponse
-  def self.current_weather_data(location)
+  extend self
+
+  def current_weather_data(location)
     # TODO: ADD MORE FIELDS IF NECESSARY TO BUILD TWEET TEXT
     {
       coord: location,
