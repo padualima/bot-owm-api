@@ -9,38 +9,46 @@ module V1
     end
 
     def callback
-      oauth = Clients::Twitter::OAuth2.new.access_token(params[:state], params[:code])
+      oauth = oauth_access_token(params[:state], params[:code])
 
-      return head :unprocessable_entity unless oauth.status.eql?(200)
-
-      input_api_token = oauth.body.merge(
-        'expires_in' => oauth.body['expires_in'].minutes.from_now,
-        'token' => ApiTokenGenerator.call(access_token: oauth.body['access_token'])
-      )
-
-      token = ActiveRecord::Base.transaction do
-        fetch_user_info = user_lookup_data(input_api_token['access_token'])
-        user = User.find_by(uid: fetch_user_info['uid']) || User.new(fetch_user_info)
-
-        user.latest_valid_api_token&.update!(expires_in: Time.current)
-
-        user
-          .then { |user| user.api_token_events.new(input_api_token) }
-          .then { |user_api_token| user_api_token.token if user_api_token.save! }
+      unless oauth.status.eql?(200)
+        return render_json(
+          ErrorSerializer.new("Twitter Authentication Failed", 422),
+          :unprocessable_entity
+        )
       end
 
-      render json: { data: { token: token } }
+      ActiveRecord::Base.transaction do
+        oauth.body.merge!(
+          'expires_in' => oauth.body['expires_in'].minutes.from_now,
+          'token' => ApiTokenGenerator.call(oauth.body['access_token'])
+        )
+
+        user_lookup_data(oauth.body['access_token'])
+          .then do |user_info|
+            input = user_info.body['data'].merge('uid' => user_info.body['data'].delete('id'))
+            User.find_by(uid: input['uid']) || User.new(input)
+          end
+          .then do |user|
+            user.latest_valid_api_token&.update!(expires_in: Time.current)
+            user.api_token_events.new(oauth.body)
+          end
+          .then do |user_api_token|
+            if user_api_token.save!
+              render_json({ data: [{ users: { token: user_api_token.token } }] })
+            end
+          end
+      end
     end
 
     private
 
+    def oauth_access_token(state, code)
+      Clients::Twitter::OAuth2.new.access_token(state, code)
+    end
+
     def user_lookup_data(access_token)
-      Clients::Twitter::V2::Users::Lookup
-        .new(oauth_token: access_token)
-        .me
-        .then do |user_info|
-          user_info.body['data'].merge('uid' => user_info.body['data'].delete('id'))
-        end
+      Clients::Twitter::V2::Users::Lookup.new(oauth_token: access_token).me
     end
   end
 end

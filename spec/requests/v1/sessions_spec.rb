@@ -39,10 +39,23 @@ RSpec.describe "V1::Sessions", type: :request do
       let(:twitter_callback) { callback_path(:twitter2, code: code, state: state) }
 
       context "when invalid authorization code" do
-        it "return unprocessable entity" do
+        it "return unprocessable entity status" do
+          get twitter_callback
+          expect(response).to have_http_status(:unprocessable_entity)
+        end
+
+        it "return a message detail" do
           get twitter_callback
 
-          expect(response).to have_http_status(:unprocessable_entity)
+          expect(response.parsed_body['errors'][0]['detail'])
+            .to eql('Twitter Authentication Failed')
+        end
+
+        it "return htpp status" do
+          get twitter_callback
+
+          expect(response.parsed_body['errors'][0]['status'])
+            .to eql(422)
         end
       end
 
@@ -71,7 +84,8 @@ RSpec.describe "V1::Sessions", type: :request do
           it "return a token data" do
             get twitter_callback
 
-            expect(response.parsed_body).to include_json({ data: { token: a_kind_of(String) } })
+            expect(response.parsed_body['data'][0])
+              .to include_json({ users: { token: a_kind_of(String) } })
           end
 
           it "return a create user and api_token_event" do
@@ -111,9 +125,11 @@ RSpec.describe "V1::Sessions", type: :request do
 
             response_body = response.parsed_body
 
-            fetch_api_token_event = ApiTokenEvent.find_by(token: response_body['data']['token'])
+            fetch_api_token_event =
+              ApiTokenEvent.find_by(token: response_body['data'][0]['users']['token'])
 
-            expect(response_body).to include_json({ data: { token: a_kind_of(String) } })
+            expect(response_body['data'][0])
+              .to include_json({ users: { token: a_kind_of(String) } })
             expect(fetch_api_token_event.user.id).to eql(api_token_event.user.id)
             expect(fetch_api_token_event.id).to eql(api_token_event.id.succ)
           end

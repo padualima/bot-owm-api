@@ -73,6 +73,11 @@ RSpec.describe "V1::Tweets", type: :request do
         end
       end
 
+      context "when lat and lon is invalid" do
+        # TODO: CHECK FORMAT WITH REGEX
+        # TODO: RETURN MESSAGE ERROR
+      end
+
       context "when name location is null" do
         let(:location_params) { { name: [nil, "", " "].sample } }
 
@@ -83,11 +88,8 @@ RSpec.describe "V1::Tweets", type: :request do
         end
       end
 
-      context "when lat and lon is invalid" do
-
-      end
-
-      context "when name location invalid" do
+      context "when name location is not found" do
+        # TODO: RETURN MESSAGE ERROR
       end
     end
   end
