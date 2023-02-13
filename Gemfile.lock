@@ -102,6 +102,7 @@ GEM
     io-console (0.6.0)
     irb (1.6.2)
       reline (>= 0.3.0)
+    kind (5.10.0)
     loofah (2.19.1)
       crass (~> 1.0.2)
       nokogiri (>= 1.5.9)
@@ -193,6 +194,11 @@ GEM
     timeout (0.3.1)
     tzinfo (2.0.5)
       concurrent-ruby (~> 1.0)
+    u-attributes (2.8.0)
+      kind (>= 4.0, < 6.0)
+    u-case (4.5.2)
+      kind (>= 5.6, < 6.0)
+      u-attributes (>= 2.7, < 3.0)
     websocket-driver (0.7.5)
       websocket-extensions (>= 0.1.0)
     websocket-extensions (0.1.5)
@@ -218,6 +224,7 @@ DEPENDENCIES
   rspec-rails (~> 6.0)
   shoulda-matchers (~> 5.3)
   tzinfo-data
+  u-case (~> 4.5.1)
 
 RUBY VERSION
    ruby 3.2.0p0

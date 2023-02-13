@@ -36,6 +36,9 @@ gem 'faraday', '~> 2.7'
 # Complete Ruby geocoding solution.
 gem 'geocoder', '~> 1.8'
 
+# Represent use cases in a simple and powerful way while writing modular.
+gem 'u-case', '~> 4.5.1'
+
 # Use Active Storage variants [https://guides.rubyonrails.org/active_storage_overview.html#transforming-images]
 # gem "image_processing", "~> 1.2"
 
