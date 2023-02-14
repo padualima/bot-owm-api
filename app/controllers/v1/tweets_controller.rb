@@ -13,7 +13,7 @@ module V1
       Tweet::CreateWithWeatherInformation
         .call(**input, api_token: @api_token)
         .on_success { |result| render_json({ tweets: { text: result[:tweet].text } }) }
-        .on_failure(:invalid_params) do |result|
+        .on_failure do |result|
           return render_json(result[:message], :unprocessable_entity)
         end
     end

@@ -11,6 +11,6 @@ class Twitter::PublishTweet < ::Micro::Case
 
     return Success result: res.body if res.status.eql?(201)
 
-    Failure result: { message: ErrorSerializer.new("Twitter Publish Text Failed", 422) }
+    Failure result: { message: ErrorSerializer.new(res.body['detail'], 422) }
   end
 end

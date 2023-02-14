@@ -19,12 +19,12 @@ CONDITION_CODE = {
   '50n' => '🌫',
 }
 
-WeatherStaticTextBuilder = -> (body) do
-  icon = CONDITION_CODE.dig(body['weather'][0]['icon'])
-  temp = body['main']['temp']
-  description = body['weather'][0]['description']
-  city = body['name']
-  time = body['timezone'].seconds.from_now
+WeatherStaticTextBuilder = -> (data) do
+  icon = CONDITION_CODE.dig(data['weather'][0]['icon'])
+  temp = data['main']['temp']
+  description = data['weather'][0]['description']
+  city = data['city']
+  time = data['timezone'].seconds.from_now
 
   "#{icon} #{temp}ºC e #{description} em #{city} em #{time.strftime("%d/%m às %H:%M:%S")}".as_json
 end

@@ -11,8 +11,11 @@ RSpec.describe "V1::Tweets", type: :request do
     context "when valid params" do
       let(:mock_current_wear) { MockOpenWeatherMapResponse.current_weather_data(city_name) }
       let(:mock_tweet_published) do
-        MockTwitterResponse::Tweets
-          .tweet_published_data(text: WeatherStaticTextBuilder.call(mock_current_wear))
+        data = {}
+        data.merge!(mock_current_wear)
+        data['city'] = city_name
+
+        MockTwitterResponse::Tweets.tweet_published_data(text: WeatherStaticTextBuilder.call(data))
       end
       let(:valid_params) { { token: api_token_event.token, location: location_params } }
 

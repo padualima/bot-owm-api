@@ -8,9 +8,10 @@ class Tweet::CreateWithWeatherInformation < ::Micro::Case
 
   def call!
     validate_location_attributes
-      .then(apply(:fetch_location))
+      .then(apply(:set_geocoder_coordinates))
       .then(apply(:get_weather_information))
-      .then(apply(:weather_static_text_builder))
+      .then(apply(:prepare_weather_information))
+      .then(apply(:build_weather_static_text))
       .then(apply(:publish_tweet))
       .then(apply(:perform_creation))
   end
@@ -26,18 +27,18 @@ class Tweet::CreateWithWeatherInformation < ::Micro::Case
       if lat && lon
         errors[:lat] = "latitude is not valid" unless latitude_is_valid?(lat)
         errors[:lon] = "longitude is not valid" unless latitude_is_valid?(lon)
-      elsif fetch_location_name(location_name).empty?
-        errors[:location_name] = "location name not found"
       end
+
+      errors[:location_name] = "location name not found" if geocoder_location.nil?
     end
 
-    return Success(:valid_params) if errors.blank?
+    return Success :valid_params, result: { geocoder_location: @geocoder_location } if errors.blank?
 
-    Failure(:invalid_params, result: { message: ErrorSerializer.new(errors.values, 422) })
+    Failure :invalid_params, result: { message: ErrorSerializer.new(errors.values, 422) }
   end
 
-  def fetch_location(lat:, lon:, location_name:, **)
-    lat, lon = fetch_location_name(location_name)[0].coordinates if location_name.present?
+  def set_geocoder_coordinates(geocoder_location:, **)
+    lat, lon = geocoder_location.coordinates
 
     Success result: { lat: lat, lon: lon }
   end
@@ -46,13 +47,24 @@ class Tweet::CreateWithWeatherInformation < ::Micro::Case
     Success result: { current_weather: OpenWeatherMap::CurrentWeatherInformation.call(lat:, lon:) }
   end
 
-  def weather_static_text_builder(current_weather:, **)
-    Success result: { text: WeatherStaticTextBuilder.call(current_weather) }
+  def prepare_weather_information(geocoder_location:, current_weather:, **)
+    data = {}
+    data.merge!(current_weather.data, 'city' => geocoder_location.city)
+
+    Success result: { weather_information: data }
+  end
+
+  def build_weather_static_text(weather_information:, **)
+    Success result: { text: WeatherStaticTextBuilder.call(weather_information) }
   end
 
   def publish_tweet(api_token:, text:, **)
     access_token = api_token.access_token
-    Success result: { tweet_published: Twitter::PublishTweet.call(access_token:, text:) }
+
+    tweet_published = Twitter::PublishTweet.call(access_token:, text:)
+      .on_failure { |result| return Failure result: { message: result[:message] } }
+
+    Success result: { tweet_published: tweet_published }
   end
 
   def perform_creation(api_token:, tweet_published:, **)
@@ -80,7 +92,11 @@ class Tweet::CreateWithWeatherInformation < ::Micro::Case
     true
   end
 
-  def fetch_location_name(location_name)
-    @fetch_location_name ||= Geocoder.search(location_name)
+  def geocoder_location
+    @geocoder_location ||= if location_name.present?
+      Geocoder.search(location_name).select { |l| %w[city village].include?(l.type) }[0]
+    else
+      Geocoder.search([lat.to_f, lon.to_f])[0]
+    end
   end
 end
