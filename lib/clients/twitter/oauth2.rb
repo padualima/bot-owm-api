@@ -43,7 +43,7 @@ module Clients
 
       private
 
-      def code_verifier = PKCE.code_verifier
+      def code_verifier = @code_verifier ||= PKCE.code_verifier
 
       def code_challenge = PKCE.code_challenge(code_verifier)
 
