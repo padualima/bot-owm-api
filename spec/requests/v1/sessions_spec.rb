@@ -84,8 +84,7 @@ RSpec.describe "V1::Sessions", type: :request do
           it "return a token data" do
             get twitter_callback
 
-            expect(response.parsed_body['data'][0])
-              .to include_json({ users: { token: a_kind_of(String) } })
+            expect(response.parsed_body).to include_json({ users: { token: a_kind_of(String) } })
           end
 
           it "return a create user and api_token_event" do
@@ -126,10 +125,9 @@ RSpec.describe "V1::Sessions", type: :request do
             response_body = response.parsed_body
 
             fetch_api_token_event =
-              ApiTokenEvent.find_by(token: response_body['data'][0]['users']['token'])
+              ApiTokenEvent.find_by(token: response_body['users']['token'])
 
-            expect(response_body['data'][0])
-              .to include_json({ users: { token: a_kind_of(String) } })
+            expect(response_body).to include_json({ users: { token: a_kind_of(String) } })
             expect(fetch_api_token_event.user.id).to eql(api_token_event.user.id)
             expect(fetch_api_token_event.id).to eql(api_token_event.id.succ)
           end

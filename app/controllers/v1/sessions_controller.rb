@@ -17,7 +17,7 @@ module V1
           .on_failure { |result| render_json(result[:message], :unprocessable_entity) }
           .on_success do |result|
             token = result.data[:api_token].token
-            render_json( { data: [{ users: { token: token } }] })
+            render_json({ users: { token: token } })
           end
       end
     end
