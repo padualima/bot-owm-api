@@ -59,7 +59,7 @@ RSpec.describe "V1::Tweets", type: :request do
         it do
           post tweets_path(params: invalid_params)
 
-          expect(response).to have_http_status(:unprocessable_entity)
+          expect(response).to have_http_status(:not_found)
         end
       end
 
@@ -69,13 +69,75 @@ RSpec.describe "V1::Tweets", type: :request do
         it do
           post tweets_path(params: invalid_params)
 
-          expect(response).to have_http_status(:unprocessable_entity)
+          expect(response).to have_http_status(:not_found)
         end
       end
 
-      context "when lat and lon is invalid" do
-        # TODO: CHECK FORMAT WITH REGEX
-        # TODO: RETURN MESSAGE ERROR
+      context "when latitude is invalid" do
+        let(:location_params) { { lat: 91.0, lon: 42.80 } }
+
+        it do
+          post tweets_path(params: invalid_params)
+
+          expect(response).to have_http_status(:unprocessable_entity)
+        end
+
+        it do
+          post tweets_path(params: invalid_params)
+
+          expect(response.parsed_body['errors'][0]['detail']).to eql("latitude is not valid")
+        end
+
+        it do
+          post tweets_path(params: invalid_params)
+
+          expect(response.parsed_body['errors'][0]['status']).to eql(422)
+        end
+      end
+
+      context "when longitude is invalid" do
+        let(:location_params) { { lat: 46.0, lon: 181.0 } }
+
+        it do
+          post tweets_path(params: invalid_params)
+
+          expect(response).to have_http_status(:unprocessable_entity)
+        end
+
+        it do
+          post tweets_path(params: invalid_params)
+
+          expect(response.parsed_body['errors'][0]['detail']).to eql("longitude is not valid")
+        end
+
+        it do
+          post tweets_path(params: invalid_params)
+
+          expect(response.parsed_body['errors'][0]['status']).to eql(422)
+        end
+      end
+
+      context "when latitude and longitude is invalid" do
+        let(:location_params) { { lat: 91.0, lon: 180.0 } }
+
+        it do
+          post tweets_path(params: invalid_params)
+
+          expect(response).to have_http_status(:unprocessable_entity)
+        end
+
+        it do
+          post tweets_path(params: invalid_params)
+
+          expect(response.parsed_body['errors'][0]['detail'])
+            .to eql("latitude is not valid and longitude is not valid")
+        end
+
+        it do
+          post tweets_path(params: invalid_params)
+
+          expect(response.parsed_body['errors'][0]['status']).to eql(422)
+        end
       end
 
       context "when name location is null" do
@@ -86,10 +148,40 @@ RSpec.describe "V1::Tweets", type: :request do
 
           expect(response).to have_http_status(:unprocessable_entity)
         end
+
+        it do
+          post tweets_path(params: invalid_params)
+
+          expect(response.parsed_body['errors'][0]['detail']).to eql("params location is missing")
+        end
+
+        it do
+          post tweets_path(params: invalid_params)
+
+          expect(response.parsed_body['errors'][0]['status']).to eql(422)
+        end
       end
 
       context "when name location is not found" do
-        # TODO: RETURN MESSAGE ERROR
+        let(:location_params) { { name: "Invalid Place" } }
+
+        it do
+          post tweets_path(params: invalid_params)
+
+          expect(response).to have_http_status(:unprocessable_entity)
+        end
+
+        it do
+          post tweets_path(params: invalid_params)
+
+          expect(response.parsed_body['errors'][0]['detail']).to eql("location name not found")
+        end
+
+        it do
+          post tweets_path(params: invalid_params)
+
+          expect(response.parsed_body['errors'][0]['status']).to eql(422)
+        end
       end
     end
   end

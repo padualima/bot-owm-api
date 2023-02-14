@@ -5,11 +5,18 @@ module V1
     before_action :set_api_token
 
     def create
-      # TODO: IMPROVE CLAUSE GUARDE WITH VALIDATE PARAMS(LAT, LON AND NAME)
-      if tweet_params.empty? || tweet_params.values.map(&:empty?).any? ||
-          @api_token.nil? || @api_token.expired?
-        return head :unprocessable_entity
-      end
+      return head :not_found unless @api_token
+
+      input =
+        { lat: tweet_params[:lat], lon: tweet_params[:lon], location_name: tweet_params[:name] }
+
+      Tweet::CreateWithWeatherInformation.call(input)
+        .on_failure(:invalid_params) do |result|
+          return render_json(
+            ErrorSerializer.new(result[:errors].values, 422),
+            :unprocessable_entity
+          )
+        end
 
       fetch_location
         .then { |lat, lon| current_weather_for(lat:, lon:) }
@@ -43,7 +50,7 @@ module V1
     private
 
     def set_api_token
-      @api_token = ApiTokenEvent.find_by(token: params[:token])
+      @api_token = ApiTokenEvent.by_valid.find_by(token: params[:token])
     end
 
     def tweet_params
