@@ -7,43 +7,14 @@ module V1
     def create
       return head :not_found unless @api_token
 
-      input =
-        { lat: tweet_params[:lat], lon: tweet_params[:lon], location_name: tweet_params[:name] }
+      input = tweet_params.to_h
+      input[:location_name] = input.delete(:name)
 
-      Tweet::CreateWithWeatherInformation.call(input)
+      Tweet::CreateWithWeatherInformation
+        .call(**input, api_token: @api_token)
+        .on_success { |result| render_json({ tweets: { text: result[:tweet].text } }) }
         .on_failure(:invalid_params) do |result|
-          return render_json(
-            ErrorSerializer.new(result[:errors].values, 422),
-            :unprocessable_entity
-          )
-        end
-
-      fetch_location
-        .then { |lat, lon| current_weather_for(lat:, lon:) }
-        .then do |current_weather|
-          case current_weather.status
-          in 200; weather_static_text_builder(body: current_weather.body)
-          else
-            # TODO: RETURN MESSAGE ERROR FOR API_OPEN_WEATHER CALL ERROR
-          end
-        end
-        .then { |text| create_tweet_with_text(text) }
-        .then do |tweet_response|
-          case tweet_response.status
-          in 200
-            Tweet
-              .new(
-                user_id: @api_token.user.id,
-                api_token_event_id: @api_token.id,
-                uid: tweet_response.body['data']['id'],
-                text: tweet_response.body['data']['text']
-              )
-              .then do |tweet|
-                render_json({ data: { tweets: { text: tweet.text } } }, :ok) if tweet.save!
-              end
-          else
-            # TODO: RETURN MESSAGE ERROR FOR TWITTER CALL ERROR
-          end
+          return render_json(result[:message], :unprocessable_entity)
         end
     end
 
@@ -55,29 +26,6 @@ module V1
 
     def tweet_params
       params.require(:location).permit(:lat, :lon, :name)
-    end
-
-    def fetch_location
-      if tweet_params.include?(:lat) && tweet_params.include?(:lon)
-        tweet_params.then { |param| [param[:lat].to_f, param[:lon].to_f] }
-      elsif tweet_params.include?(:name)
-        Geocoder.search(tweet_params[:name])[0].coordinates
-      end
-    end
-
-    def weather_static_text_builder(body:)
-      # TODO: CHANGE THIS TO A TEXT CREATION SERVICE
-      body['coord'].values
-    end
-
-    def current_weather_for(lat:, lon:)
-      Clients::OpenWeatherMap::V3::Weather.current(lat: lat, lon: lon)
-    end
-
-    def create_tweet_with_text(text)
-      Clients::Twitter::V2::Tweets::ManageTweets
-        .new(oauth_token: @api_token.access_token)
-        .new_tweet(text)
     end
   end
 end

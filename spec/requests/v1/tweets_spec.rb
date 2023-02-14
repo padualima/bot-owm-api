@@ -27,7 +27,7 @@ RSpec.describe "V1::Tweets", type: :request do
           .and_return(
             instance_double(
               Faraday::Response,
-              body: MockTwitterResponse::Tweets.new_tweet_data(text: location_params),
+              body: MockTwitterResponse::Tweets.new_tweet_data(text: city_coordinates.values),
               status: 200
             )
           )
@@ -37,12 +37,24 @@ RSpec.describe "V1::Tweets", type: :request do
         let(:location_params) { city_coordinates }
 
         it { expect { post tweets_path(params: valid_params) }.to change(Tweet, :count).by(1) }
+
+        it do
+          post tweets_path(params: valid_params)
+
+          expect(response.parsed_body['tweets']['text']).to eql(city_coordinates.values.to_s)
+        end
       end
 
       context "when location by name" do
         let(:location_params) { { name: city } }
 
         it { expect { post tweets_path(params: valid_params) }.to change(Tweet, :count).by(1) }
+
+        it do
+          post tweets_path(params: valid_params)
+
+          expect(response.parsed_body['tweets']['text']).to eql(city_coordinates.values.to_s)
+        end
       end
     end
 
