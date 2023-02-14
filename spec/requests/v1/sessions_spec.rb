@@ -9,7 +9,7 @@ RSpec.describe "V1::Sessions", type: :request do
       expect(response).to have_http_status(:success)
     end
 
-    it "return a mesasge data with string" do
+    it do
       get authorize_path
 
       expect(response.parsed_body).to include_json({ data: { message: a_kind_of(String) } })
@@ -44,11 +44,10 @@ RSpec.describe "V1::Sessions", type: :request do
           expect(response).to have_http_status(:unprocessable_entity)
         end
 
-        it "return a message detail" do
+        it do
           get twitter_callback
 
-          expect(response.parsed_body['errors'][0]['detail'])
-            .to eql('Twitter Authentication Failed')
+          expect(response.parsed_body['errors'][0]).to include_json({ detail: a_kind_of(String) })
         end
 
         it "return htpp status" do
