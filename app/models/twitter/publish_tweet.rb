@@ -9,7 +9,7 @@ class Twitter::PublishTweet < ::Micro::Case
       .new(oauth_token: access_token)
       .new_tweet(text)
 
-    return Success result: res.body if res.status.eql?(200)
+    return Success result: res.body if res.status.eql?(201)
 
     Failure result: { message: ErrorSerializer.new("Twitter Publish Text Failed", 422) }
   end

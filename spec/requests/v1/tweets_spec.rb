@@ -21,7 +21,7 @@ RSpec.describe "V1::Tweets", type: :request do
           .and_return(instance_double(Faraday::Response, body: mock_current_wear, status: 200))
 
         allow_any_instance_of(Faraday::Connection).to receive(:post)
-          .and_return(instance_double(Faraday::Response, body: mock_tweet_published, status: 200))
+          .and_return(instance_double(Faraday::Response, body: mock_tweet_published, status: 201))
       end
 
       context "when location by lat and lon" do
