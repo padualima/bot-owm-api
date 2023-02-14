@@ -47,8 +47,7 @@ class Tweet::CreateWithWeatherInformation < ::Micro::Case
   end
 
   def weather_static_text_builder(current_weather:, **)
-    # TODO: CHANGE THIS TO A TEXT CREATION SERVICE
-    Success result: { text: current_weather['coord'].values }
+    Success result: { text: WeatherStaticTextBuilder.call(current_weather) }
   end
 
   def publish_tweet(api_token:, text:, **)
