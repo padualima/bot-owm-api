@@ -21,10 +21,11 @@ CONDITION_CODE = {
 
 WeatherStaticTextBuilder = -> (data) do
   icon = CONDITION_CODE.dig(data['weather'][0]['icon'])
-  temp = data['main']['temp']
+  temp = data['main']['temp'].round
   description = data['weather'][0]['description']
-  city = data['city']
+  location = "#{data['city']}, #{data['sys']['country']}"
   time = data['timezone'].seconds.from_now
 
-  "#{icon} #{temp}ºC e #{description} em #{city} em #{time.strftime("%d/%m às %H:%M:%S")}".as_json
+  "Tempo Atual em: #{location} (#{time.strftime("%d/%m às %H:%Mh")})
+  #{icon} #{temp}ºC e #{description}"
 end

@@ -30,6 +30,7 @@ module MockOpenWeatherMapResponse
       }],
       main: { temp: (-15..39).to_a.sample },
       timezone: -10800,
+      sys: { country: 'BR' },
       name: city_name,
       cod: 200
     }.as_json

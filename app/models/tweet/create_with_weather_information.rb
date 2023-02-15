@@ -88,9 +88,11 @@ class Tweet::CreateWithWeatherInformation < ::Micro::Case
       end
   end
 
-  def geocoder_search_by_name(location_name)
-    available_types = %w[arts_centre city village]
-    geocoder_search(location_name).select { |l| available_types.include?(l.type) }[0]
+  def geocoder_search_by_name(name)
+    available_types = %w[administrative arts_centre city village]
+    geocoder_search(name).select do |g|
+      g.type == available_types[0] && g.city.present? || available_types.include?(g.type)
+    end[0]
   end
 
   def geocoder_search(input) = Geocoder.search(input)
