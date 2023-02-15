@@ -58,6 +58,8 @@ RSpec.describe "V1::Tweets", type: :request do
       let(:token_params) { api_token_event.token }
       let(:location_params) { city_coordinates }
       let(:invalid_params) { { token: token_params, location: location_params } }
+      let(:invalid_lat) { [-91.0, 91.0].sample }
+      let(:invalid_lon) { [-181.0, 181.0].sample }
 
       context "when token has expired" do
         before do
@@ -82,7 +84,7 @@ RSpec.describe "V1::Tweets", type: :request do
       end
 
       context "when latitude is invalid" do
-        let(:location_params) { { lat: 91.0, lon: 42.80 } }
+        let(:location_params) { { lat: invalid_lat, lon: 42.80 } }
 
         it do
           post tweets_path(params: invalid_params)
@@ -104,7 +106,7 @@ RSpec.describe "V1::Tweets", type: :request do
       end
 
       context "when longitude is invalid" do
-        let(:location_params) { { lat: 46.0, lon: 181.0 } }
+        let(:location_params) { { lat: 46.0, lon: invalid_lon } }
 
         it do
           post tweets_path(params: invalid_params)
@@ -126,7 +128,7 @@ RSpec.describe "V1::Tweets", type: :request do
       end
 
       context "when latitude and longitude is invalid" do
-        let(:location_params) { { lat: 91.0, lon: 180.0 } }
+        let(:location_params) { { lat: invalid_lat, lon: invalid_lon } }
 
         it do
           post tweets_path(params: invalid_params)
