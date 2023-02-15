@@ -16,7 +16,7 @@ Make sure you have Docker and Docker-Compose installed on your machine!
 
 Inside the project directory:
 
-**Copy the .env and configure with database credentials and your Twitter and OpenWeatherMap API keys:**
+**Copy the `.env` and configure with database credentials and your Twitter and OpenWeatherMap API keys:**
 ```
 cp .env.sample .env
 ```
