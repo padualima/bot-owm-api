@@ -5,16 +5,18 @@ class User::RegisterInTwitterCallback < ::Micro::Case
   attribute :code, default: -> value { value.to_s.strip }
 
   def call!
-    Twitter::GetAccessToken.call(state:, code:)
-      .then do |token|
-        return Failure result: token.data if token.failure?
+    transaction do
+      Twitter::GetAccessToken.call(state:, code:)
+        .then do |token|
+          return Failure result: token.data if token.failure?
 
-        Success result: { oauth_access_token: token.data }
-      end
-      .then(apply(:assign_token_and_expires_in))
-      .then(apply(:twitter_user_lookup))
-      .then(apply(:find_or_initializer_user))
-      .then(apply(:user_api_token_creation))
+          Success result: { oauth_access_token: token.data }
+        end
+        .then(apply(:assign_token_and_expires_in))
+        .then(apply(:twitter_user_lookup))
+        .then(apply(:find_or_initializer_user))
+        .then(apply(:user_api_token_creation))
+    end
   end
 
   private

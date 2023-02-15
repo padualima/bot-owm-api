@@ -9,17 +9,10 @@ module V1
     end
 
     def callback
-      ActiveRecord::Base.transaction do
-        input = callback_params.to_h
-
-        User::RegisterInTwitterCallback
-          .call(input)
-          .on_failure { |result| render_json(result[:message], :unprocessable_entity) }
-          .on_success do |result|
-            token = result.data[:api_token].token
-            render_json({ users: { token: token } })
-          end
-      end
+      User::RegisterInTwitterCallback
+        .call(callback_params.to_h)
+        .on_failure { |result| render_json(result[:message], :unprocessable_entity) }
+        .on_success { |result| render_json({ users: { token: result.data[:api_token].token } }) }
     end
 
     private
