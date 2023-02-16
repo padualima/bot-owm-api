@@ -4,6 +4,12 @@ Authenticate your account do Twitter and create Tweets with weather information 
 
 ## **Getting Started!**
 
+#### **Twitter Premises**
+
+In the twitter authentication settings, remember to configure the callback route as in the example below:
+<img width="695" alt="Captura de Tela 2023-02-16 às 12 48 14" src="https://user-images.githubusercontent.com/31924649/219417624-b952d690-2ec3-4487-8c97-aa208035f3a9.png">
+
+
 ### **Docker (recommended)**
 
 Make sure you have Docker and Docker-Compose installed on your machine!
