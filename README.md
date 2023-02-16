@@ -4,11 +4,21 @@ Authenticate your account do Twitter and create Tweets with weather information 
 
 ## **Getting Started!**
 
-#### **Twitter Premises**
+### **Premises**
+
+#### **Twitter Authentication Settings**
+
 
 In the twitter authentication settings, remember to configure the callback route as in the example below:
 <img width="695" alt="Captura de Tela 2023-02-16 às 12 48 14" src="https://user-images.githubusercontent.com/31924649/219417624-b952d690-2ec3-4487-8c97-aa208035f3a9.png">
 
+#### **Configure the Envs**
+Inside the project directory:
+
+**Copy the `.env` to configure with database credentials and your Twitter and OpenWeatherMap API keys:**
+```
+cp .env.sample .env
+```
 
 ### **Docker (recommended)**
 
@@ -19,13 +29,6 @@ Make sure you have Docker and Docker-Compose installed on your machine!
 >  * Install Docker: [Click here!](https://www.digitalocean.com/community/tutorials/how-to-install-and-use-docker-on-ubuntu-20-04-pt)
 >
 >  * Install Docker-compose: [Click here!](https://www.digitalocean.com/community/tutorials/how-to-install-and-use-docker-compose-on-ubuntu-20-04-pt)
-
-Inside the project directory:
-
-**Copy the `.env` and configure with database credentials and your Twitter and OpenWeatherMap API keys:**
-```
-cp .env.sample .env
-```
 
 **Run to build the docker image and install dependences:**
 ```
@@ -48,13 +51,15 @@ make run_tests
 Then go up Application, now with the request below authenticate your twitter account:
 ##### GET /authorize
 ```
-curl --location 'http://localhost:3000/authorize'
+curl --location 'http://localhost:3000/authorize' \
+--header 'Accept: application/vnd.owm-bot-api.v1'
 ```
 
 With the token in hand, create Tweets based on weather information for a given region, passing latitude and longitude or region name as parameters:
 ##### POST /tweets
 ```
 curl --location 'http://localhost:3000/tweets?token=YOUR_TOKEN' \
+--header 'Accept: application/vnd.owm-bot-api.v1' \
 --header 'Content-Type: application/json' \
 --data '{
     "location": {
