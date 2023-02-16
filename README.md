@@ -1,4 +1,4 @@
-## **OWM-API**
+## **BOT-OWM**
 
 Authenticate your account do Twitter and create Tweets with weather information for a particular region provided by OpenWeatherMap.
 
