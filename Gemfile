@@ -30,6 +30,10 @@ gem 'geocoder', '~> 1.8'
 # Represent use cases in a simple and powerful way while writing modular.
 gem 'u-case', '~> 4.5.1'
 
+# Generate beautiful API documentation
+gem 'rswag-api', '~> 2.8'
+gem 'rswag-ui', '~> 2.8'
+
 group :development, :test do
   # See https://guides.rubyonrails.org/debugging_rails_applications.html#debugging-with-the-debug-gem
   gem "debug", platforms: %i[ mri mingw x64_mingw ]
@@ -47,4 +51,6 @@ group :development, :test do
   gem 'shoulda-matchers', '~> 5.3'
   # Faker, a port of Data::Faker from Perl, is used to easily generate fake data: names, addresses..
   gem 'faker', '~> 3.1'
+  # Simplify API integration testing with a succinct rspec DSL and generate OpenAPI specification
+  gem 'rswag-specs', '~> 2.8'
 end
