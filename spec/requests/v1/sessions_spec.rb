@@ -1,8 +1,29 @@
 # frozen_string_literal: true
 
 require 'rails_helper'
+require 'swagger_helper'
 
 RSpec.describe "V1::Sessions", type: :request do
+
+  describe "swagger" do
+    path '/authorize' do
+
+      get('authorize session') do
+        response(200, 'successful') do
+
+          after do |example|
+            example.metadata[:response][:content] = {
+              'application/json' => {
+                example: JSON.parse(response.body, symbolize_names: true)
+              }
+            }
+          end
+          run_test!
+        end
+      end
+    end
+  end
+
   describe "GET /authorize" do
     it "returns http success" do
       get authorize_path
