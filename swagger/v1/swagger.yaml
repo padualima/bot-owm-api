@@ -39,6 +39,42 @@ paths:
           description: Successful
         '422':
           description: Unprocessable Entity
+  "/tweets":
+    post:
+      summary: create tweets
+      tags:
+      - Tweets
+      parameters:
+      - name: token
+        in: query
+        required: true
+        schema:
+          type: string
+      - name: location
+        in: query
+        required: true
+        schema:
+          type: object
+          properties:
+            location:
+              type: object
+              properties:
+                lat:
+                  type: number
+                  example: 71.62837975368956
+                lon:
+                  type: number
+                  example: 173.9084353170361
+                name:
+                  type: string
+                  example: South Zulemamouth
+      responses:
+        '200':
+          description: Successful
+        '404':
+          description: Token Not Found
+        '422':
+          description: Unprocessable Entity
 servers:
 - url: http://localhost:3000
   variables:
