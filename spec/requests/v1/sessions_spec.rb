@@ -9,7 +9,7 @@ RSpec.describe "V1::Sessions", type: :request do
     path '/authorize' do
 
       get('authorize session') do
-        response(200, 'successful') do
+        response(200, 'Successful') do
 
           after do |example|
             example.metadata[:response][:content] = {
@@ -29,7 +29,27 @@ RSpec.describe "V1::Sessions", type: :request do
       parameter name: :code, in: :query, type: :string, required: true
 
       get('callback session') do
-        response(200, 'successful') do
+        response(200, 'Successful') do
+          before do
+            allow_any_instance_of(Faraday::Connection).to receive(:post)
+              .and_return(
+                instance_double(
+                  Faraday::Response,
+                  body: MockTwitterResponse::OAuth2.access_token_data,
+                  status: 200
+                )
+              )
+
+            allow_any_instance_of(Faraday::Connection).to receive(:get)
+              .and_return(
+                instance_double(
+                  Faraday::Response,
+                  body: MockTwitterResponse::Users.me_data,
+                  status: 200
+                )
+              )
+          end
+
           let(:provider) { 'twitter2' }
           let(:state) { 'state' }
           let(:code) { 'code' }
@@ -41,7 +61,22 @@ RSpec.describe "V1::Sessions", type: :request do
               }
             }
           end
-          xit
+          run_test!
+        end
+
+        response(422, 'Unprocessable Entity') do
+          let(:provider) { 'twitter2' }
+          let(:state) { 'state' }
+          let(:code) { 'code' }
+
+          after do |example|
+            example.metadata[:response][:content] = {
+              'application/json' => {
+                example: JSON.parse(response.body, symbolize_names: true)
+              }
+            }
+          end
+          run_test!
         end
       end
     end

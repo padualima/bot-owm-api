@@ -9,7 +9,7 @@ paths:
       summary: authorize session
       responses:
         '200':
-          description: successful
+          description: Successful
   "/auths/{provider}/callback":
     parameters:
     - name: provider
@@ -32,7 +32,9 @@ paths:
       summary: callback session
       responses:
         '200':
-          description: successful
+          description: Successful
+        '422':
+          description: Unprocessable Entity
 servers:
 - url: http://localhost:3000
   variables:
