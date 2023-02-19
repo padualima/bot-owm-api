@@ -7,6 +7,8 @@ paths:
   "/authorize":
     get:
       summary: authorize session
+      tags:
+      - Sessions
       responses:
         '200':
           description: Successful
@@ -30,6 +32,8 @@ paths:
         type: string
     get:
       summary: callback session
+      tags:
+      - Sessions
       responses:
         '200':
           description: Successful

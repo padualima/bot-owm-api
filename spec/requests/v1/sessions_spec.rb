@@ -5,10 +5,12 @@ require 'swagger_helper'
 
 RSpec.describe "V1::Sessions", type: :request do
 
-  describe "swagger" do
+  describe 'Sessions Swagger', swagger_doc: 'v1/swagger.yaml' do
     path '/authorize' do
-
       get('authorize session') do
+        tags 'Sessions'
+        produces 'application/json'
+
         response(200, 'Successful') do
 
           after do |example|
@@ -29,6 +31,9 @@ RSpec.describe "V1::Sessions", type: :request do
       parameter name: :code, in: :query, type: :string, required: true
 
       get('callback session') do
+        tags 'Sessions'
+        produces 'application/json'
+
         response(200, 'Successful') do
           before do
             allow_any_instance_of(Faraday::Connection).to receive(:post)

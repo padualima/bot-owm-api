@@ -11,5 +11,5 @@ Rails.application.routes.draw do
   mount Rswag::Api::Engine => '/api-docs'
   draw :v1
 
-  # root "articles#index"
+  root "v1/sessions#authorize"
 end
