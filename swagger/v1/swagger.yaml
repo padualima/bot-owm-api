@@ -10,6 +10,29 @@ paths:
       responses:
         '200':
           description: successful
+  "/auths/{provider}/callback":
+    parameters:
+    - name: provider
+      in: path
+      description: provider
+      required: true
+      schema:
+        type: string
+    - name: state
+      in: query
+      required: true
+      schema:
+        type: string
+    - name: code
+      in: query
+      required: true
+      schema:
+        type: string
+    get:
+      summary: callback session
+      responses:
+        '200':
+          description: successful
 servers:
 - url: http://localhost:3000
   variables:

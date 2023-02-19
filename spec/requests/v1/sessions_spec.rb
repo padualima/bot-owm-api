@@ -22,6 +22,29 @@ RSpec.describe "V1::Sessions", type: :request do
         end
       end
     end
+
+    path '/auths/{provider}/callback' do
+      parameter name: :provider, in: :path, type: :string, description: 'provider'
+      parameter name: :state, in: :query, type: :string, required: true
+      parameter name: :code, in: :query, type: :string, required: true
+
+      get('callback session') do
+        response(200, 'successful') do
+          let(:provider) { 'twitter2' }
+          let(:state) { 'state' }
+          let(:code) { 'code' }
+
+          after do |example|
+            example.metadata[:response][:content] = {
+              'application/json' => {
+                example: JSON.parse(response.body, symbolize_names: true)
+              }
+            }
+          end
+          xit
+        end
+      end
+    end
   end
 
   describe "GET /authorize" do
