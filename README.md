@@ -70,6 +70,9 @@ curl --location 'http://localhost:3000/tweets?token=YOUR_TOKEN' \
 }'
 ```
 
+Or if you prefer, access the Swagger UI with http://localhost:3000/api-docs and make the requests
+<img width="1438" alt="Captura de Tela 2023-02-20 às 13 21 35" src="https://user-images.githubusercontent.com/31924649/220158537-a5c0816d-3e9b-4285-8962-aefc9a8a51bf.png">
+
 ## **License**
 
 MIT
