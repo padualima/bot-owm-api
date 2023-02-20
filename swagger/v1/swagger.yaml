@@ -52,7 +52,6 @@ paths:
           type: string
       - name: location
         in: query
-        required: true
         schema:
           type: object
           properties:
@@ -61,13 +60,13 @@ paths:
               properties:
                 lat:
                   type: number
-                  example: 71.62837975368956
+                  example: 76.2592
                 lon:
                   type: number
-                  example: 173.9084353170361
+                  example: -157.93604
                 name:
                   type: string
-                  example: South Zulemamouth
+                  example: City Name
       responses:
         '200':
           description: Successful

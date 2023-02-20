@@ -23,16 +23,16 @@ describe 'Tweets Swagger', type: :request, swagger_doc: 'v1/swagger.yaml' do
       produces 'application/json'
 
       parameter name: :token, in: :query, type: :string, required: true
-      parameter name: :location, in: :query, required: true,
+      parameter name: :location, in: :query,
         schema: {
           type: :object,
           properties: {
             location: {
               type: :object,
               properties: {
-                lat: { type: :number, example: Faker::Address.latitude },
-                lon: { type: :number, example: Faker::Address.longitude },
-                name: { type: :string, example: Faker::Address.city  }
+                lat: { type: :number, example: 76.2592 },
+                lon: { type: :number, example: -157.93604 },
+                name: { type: :string, example: 'City Name' }
               }
             }
           }
