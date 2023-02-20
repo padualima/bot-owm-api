@@ -3,10 +3,10 @@
 require 'rails_helper'
 require 'swagger_helper'
 
-describe 'Tweets Swagger', type: :request, swagger_doc: 'v1/swagger.yaml' do
-  let(:token) { create(:api_token_event).token }
+RSpec.describe "V1::Tweets", type: :request do
+  let(:api_token_event) { create(:api_token_event) }
+  let(:token) { api_token_event.token }
   let(:city_coordinates) { { lat: -5.08921, lon: -42.8016 } }
-  let(:location) { { location: city_coordinates } }
   let(:city_name) { Geocoder.search(city_coordinates.values)[0].city }
   let(:mock_current_wear) { MockOpenWeatherMapResponse.current_weather_data(city_name) }
   let(:mock_tweet_published) do
@@ -17,77 +17,67 @@ describe 'Tweets Swagger', type: :request, swagger_doc: 'v1/swagger.yaml' do
     MockTwitterResponse::Tweets.tweet_published_data(text: WeatherStaticTextBuilder.call(data))
   end
 
-  path '/tweets' do
-    post('create tweets') do
-      tags 'Tweets'
-      produces 'application/json'
+  describe 'Tweets Swagger', swagger_doc: 'v1/swagger.yaml' do
+    path '/tweets' do
+      post('create tweets') do
+        tags 'Tweets'
+        produces 'application/json'
 
-      parameter name: :token, in: :query, type: :string, required: true
-      parameter name: :location, in: :query,
-        schema: {
-          type: :object,
-          properties: {
-            location: {
-              type: :object,
-              properties: {
-                lat: { type: :number, example: 76.2592 },
-                lon: { type: :number, example: -157.93604 },
-                name: { type: :string, example: 'City Name' }
+        parameter name: :token, in: :query, type: :string, required: true
+        parameter name: :location, in: :query,
+          schema: {
+            type: :object,
+            properties: {
+              location: {
+                type: :object,
+                properties: {
+                  lat: { type: :number, example: 76.2592 },
+                  lon: { type: :number, example: -157.93604 },
+                  name: { type: :string, example: 'City Name' }
+                }
               }
             }
           }
-        }
 
-      response(200, 'Successful') do
-        before do
-          allow_any_instance_of(Faraday::Connection).to receive(:get)
-            .and_return(instance_double(Faraday::Response, body: mock_current_wear, status: 200))
+        let(:location) { { location: city_coordinates } }
 
-          allow_any_instance_of(Faraday::Connection).to receive(:post)
-            .and_return(instance_double(Faraday::Response, body: mock_tweet_published, status: 201))
-        end
+        response(200, 'Successful') do
+          before do
+            allow_any_instance_of(Faraday::Connection).to receive(:get)
+              .and_return(instance_double(Faraday::Response, body: mock_current_wear, status: 200))
 
-        after do |example|
-          example.metadata[:response][:content] = {
-            'application/json' => {
-              example: JSON.parse(response.body, symbolize_names: true)
+            allow_any_instance_of(Faraday::Connection).to receive(:post)
+              .and_return(instance_double(Faraday::Response, body: mock_tweet_published, status: 201))
+          end
+
+          after do |example|
+            example.metadata[:response][:content] = {
+              'application/json' => {
+                example: JSON.parse(response.body, symbolize_names: true)
+              }
             }
-          }
+          end
+          run_test!
         end
-        run_test!
-      end
 
-      response(404, 'Token Not Found') do
-        let(:token) { nil }
-        run_test!
-      end
+        response(404, 'Token Not Found') do
+          let(:token) { nil }
+          run_test!
+        end
 
-      response(422, 'Unprocessable Entity') do
-        let(:invalid_lat) { [-91.0, 91.0].sample }
-        let(:city_coordinates) { { lat: invalid_lat, lon: -42.8016 } }
+        response(422, 'Unprocessable Entity') do
+          let(:invalid_lat) { [-91.0, 91.0].sample }
+          let(:city_coordinates) { { lat: invalid_lat, lon: -42.8016 } }
 
-        run_test!
+          run_test!
+        end
       end
     end
   end
-end
 
-RSpec.describe "V1::Tweets", type: :request do
   describe "POST /create" do
-    let(:api_token_event) { create(:api_token_event) }
-    let(:city_coordinates) { { lat: -5.08921, lon: -42.8016 } }
-    let(:city_name) { Geocoder.search(city_coordinates.values)[0].city }
-
     context "when valid params" do
-      let(:mock_current_wear) { MockOpenWeatherMapResponse.current_weather_data(city_name) }
-      let(:mock_tweet_published) do
-        data = {}
-        data.merge!(mock_current_wear)
-        data['city'] = city_name
-
-        MockTwitterResponse::Tweets.tweet_published_data(text: WeatherStaticTextBuilder.call(data))
-      end
-      let(:valid_params) { { token: api_token_event.token, location: location_params } }
+      let(:valid_params) { { token: token, location: location_params } }
 
       before do
         allow_any_instance_of(Faraday::Connection).to receive(:get)
@@ -125,9 +115,8 @@ RSpec.describe "V1::Tweets", type: :request do
     end
 
     context "when invalid params" do
-      let(:token_params) { api_token_event.token }
       let(:location_params) { city_coordinates }
-      let(:invalid_params) { { token: token_params, location: location_params } }
+      let(:invalid_params) { { token: token, location: location_params } }
       let(:invalid_lat) { [-91.0, 91.0].sample }
       let(:invalid_lon) { [-181.0, 181.0].sample }
 
@@ -144,7 +133,7 @@ RSpec.describe "V1::Tweets", type: :request do
       end
 
       context "when token not exist" do
-        let(:token_params) { [nil, "", " "].sample }
+        let(:token) { [nil, "", " "].sample }
 
         it do
           post tweets_path(params: invalid_params)
