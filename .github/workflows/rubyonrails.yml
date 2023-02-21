@@ -46,4 +46,4 @@ jobs:
       - name: Set up database schema
         run: bin/rails db:create db:migrate
       - name: Run tests
-        run: rspec
+        run: bin/rake rspec spec
