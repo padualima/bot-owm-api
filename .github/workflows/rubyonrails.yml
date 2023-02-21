@@ -12,24 +12,19 @@ on:
     branches: [ "main" ]
 jobs:
   test:
-    strategy:
-      fail-fast: false
-      matrix:
-        os: [ubuntu-latest, macos-latest]
-        ruby: ['3.2']
-    runs-on: ${{ matrix.os }}
+    runs-on: ubuntu-latest
     services:
       postgres:
         image: postgres:11-alpine
         ports:
           - "5432:5432"
         env:
-          POSTGRES_DB: rails_test
+          POSTGRES_DB: owm_bot_api_test
           POSTGRES_USER: postgres
           POSTGRES_PASSWORD: postgres
     env:
       RAILS_ENV: test
-      DATABASE_URL: "postgres://rails:password@localhost:5432/rails_test"
+      DATABASE_URL: "postgres://rails:password@localhost:5432/test"
       DATABASE_PORT: 5432
       DATABASE_HOST: localhost
       DATABASE_USERNAME: postgres
@@ -42,12 +37,11 @@ jobs:
       OPEN_WEATHER_MAP_API_KEY: YOUR_OPEN_WEATHER_MAP_API_KEY
       OPEN_WEATHER_MAP_API_URL: https://api.openweathermap.org
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
+      - uses: actions/checkout@v3
       - name: Install Ruby and gems
-        uses: ruby/setup-ruby@v1.127.0
+        uses: ruby/setup-ruby@v1
         with:
-          ruby-version: '3.2.0' 
+          ruby-version: '3.2.0'
           bundler-cache: true
       - name: Set up database schema
         run: bin/rails db:create db:migrate
