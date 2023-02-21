@@ -1,4 +1,7 @@
 ## **BOT-OWM**
+<a href="https://github.com/padualima/bot-owm-api/actions/workflows/rubyonrails.yml">
+    <img alt="Build Status" src="https://github.com/padualima/bot-owm-api/actions/workflows/rubyonrails.yml/badge.svg">
+</a>
 
 Authenticate your account do Twitter and create Tweets with weather information for a particular region provided by OpenWeatherMap.
 
