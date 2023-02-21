@@ -1,0 +1,55 @@
+# This workflow uses actions that are not certified by GitHub.  They are
+# provided by a third-party and are governed by separate terms of service,
+# privacy policy, and support documentation.
+#
+# This workflow will install a prebuilt Ruby version, install dependencies, and
+# run tests and linters.
+name: "Ruby on Rails CI"
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:11-alpine
+        ports:
+          - "5432:5432"
+        env:
+          POSTGRES_DB: owm_bot_api_test
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+    env:
+      RAILS_ENV: test
+      DATABASE_URL: "postgres://postgres:postgres@localhost:5432/owm_bot_api_test"
+      DATABASE_PORT: 5432
+      DATABASE_HOST: localhost
+      DATABASE_USERNAME: postgres
+      DATABASE_PASSWORD: postgres
+      TWITTER_BASE_URL_V2: https://api.twitter.com/2
+      TWITTER_AUTHORIZE_URL: https://twitter.com/i/oauth2/authorize
+      TWITTER_CLIENT_ID: YOUR_CLIENT_ID
+      TWITTER_CLIENT_SECRET: YOUR_CLIENT_SECRET
+      TWITTER_CALLBACK_URL: http://localhost:3000/auths/twitter2/callback
+      OPEN_WEATHER_MAP_API_KEY: YOUR_OPEN_WEATHER_MAP_API_KEY
+      OPEN_WEATHER_MAP_API_URL: https://api.openweathermap.org
+    steps:
+      - uses: actions/checkout@v3
+      - name: Install Ruby and gems
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.2.0'
+          bundler-cache: true
+      - name: Install Dependencies
+        run: |
+          sudo apt install -yqq libpq-dev
+          gem install bundler
+      - name: Set up database schema
+        run: bin/rails db:create db:migrate
+      - name: Run tests
+        run: |
+          bundle install
+          bundle exec rspec spec
