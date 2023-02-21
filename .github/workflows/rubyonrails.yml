@@ -47,9 +47,9 @@ jobs:
         run: |
           sudo apt install -yqq libpq-dev
           gem install bundler
-      - name: Install Gems
-        run: bundle install
       - name: Set up database schema
         run: bin/rails db:create db:migrate
       - name: Run tests
-        run: bin/rake rspec spec
+        run: |
+          bundle install
+          bundle exec rspec spec
