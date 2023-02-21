@@ -43,6 +43,12 @@ jobs:
         with:
           ruby-version: '3.2.0'
           bundler-cache: true
+      - name: Install Dependencies
+        run: |
+          sudo apt install -yqq libpq-dev
+          gem install bundler
+      - name: Install Gems
+        run: bundle install
       - name: Set up database schema
         run: bin/rails db:create db:migrate
       - name: Run tests
