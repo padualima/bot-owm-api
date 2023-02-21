@@ -24,7 +24,7 @@ jobs:
           POSTGRES_PASSWORD: postgres
     env:
       RAILS_ENV: test
-      DATABASE_URL: "postgres://rails:password@localhost:5432/test"
+      DATABASE_URL: "postgres://postgres:password@localhost:5432/test"
       DATABASE_PORT: 5432
       DATABASE_HOST: localhost
       DATABASE_USERNAME: postgres
