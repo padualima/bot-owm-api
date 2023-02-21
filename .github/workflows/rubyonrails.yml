@@ -13,9 +13,6 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        ruby: [3.2]
     services:
       postgres:
         image: postgres:11-alpine
