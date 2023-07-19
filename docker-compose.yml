@@ -12,6 +12,8 @@ services:
       - "5432:5432"
 
   api:
+    tty: true
+    stdin_open: true
     container_name: owm-api
     build: .
     command: bash bin/start.sh

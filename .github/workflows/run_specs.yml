@@ -4,14 +4,15 @@
 #
 # This workflow will install a prebuilt Ruby version, install dependencies, and
 # run tests and linters.
-name: "Ruby on Rails CI"
+name: "Rails Specs"
 on:
   push:
     branches: [ "main" ]
   pull_request:
     branches: [ "main" ]
 jobs:
-  test:
+  rspec-test:
+    name: "RSpec"
     runs-on: ubuntu-latest
     services:
       postgres:
@@ -38,7 +39,7 @@ jobs:
       OPEN_WEATHER_MAP_API_URL: https://api.openweathermap.org
     steps:
       - uses: actions/checkout@v3
-      - name: Install Ruby and gems
+      - name: Install Ruby and Gems
         uses: ruby/setup-ruby@v1
         with:
           ruby-version: '3.2.0'
@@ -49,7 +50,7 @@ jobs:
           gem install bundler
       - name: Set up database schema
         run: bin/rails db:create db:migrate
-      - name: Run tests
+      - name: Run RSpec
         run: |
           bundle install
           bundle exec rspec spec
