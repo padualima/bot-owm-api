@@ -22,6 +22,9 @@ run_tests: ## Run the test suite
 run_tests:
 	docker-compose run --rm api bundle exec rspec
 
+swagger:
+	docker-compose run --rm api bundle exec rails rswag:specs:swaggerize
+
 ifndef VERBOSE
 .SILENT:
 endif
