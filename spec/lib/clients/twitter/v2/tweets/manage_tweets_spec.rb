@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-require "clients/twitter/v2/base"
-require "clients/twitter/v2/tweets/manage_tweets"
 require 'rails_helper'
 
 describe Clients::Twitter::V2::Tweets::ManageTweets do
