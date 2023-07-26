@@ -1,5 +1,5 @@
 ## **BOT-OWM**
-<a href="https://github.com/padualima/bot-owm-api/actions/workflows/rubyonrails.yml">
+<a href="https://github.com/padualima/bot-owm-api/actions/workflows/run_specs.yml">
     <img alt="Build Status" src="https://github.com/padualima/bot-owm-api/actions/workflows/rubyonrails.yml/badge.svg">
 </a>
 
