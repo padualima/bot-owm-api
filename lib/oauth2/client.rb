@@ -11,12 +11,23 @@ module OAuth2
     # @param [String] url the host of the provider
     # @param [String] options the options of connection builder
     def initialize(client_id: nil, client_secret: nil, **options)
-      opts = options.dup.transform_keys(&:to_sym)
+      opts = Utils.symbolize_hash_keys(options.dup)
 
       @client_id = client_id
       @client_secret = client_secret
       @url = opts.delete(:url)
-      @options = default_options.merge(opts)
+      @options = {
+        redirect_uri: nil,
+        authorize_options: {
+          url: 'oauth/authorize'
+        },
+        token_options: {
+          method: :post,
+          url: 'oauth/token',
+          headers: { 'Content-Type' => 'application/x-www-form-urlencoded' }
+        },
+        logger: ::Logger.new($stdout)
+      }.merge(opts)
     end
 
     def authorize_url(params = {})
@@ -34,15 +45,6 @@ module OAuth2
     end
 
     private
-
-    def default_options
-      {
-        authorize_url: 'oauth/authorize',
-        token_url: 'oauth/token',
-        redirect_uri: nil,
-        logger: ::Logger.new($stdout)
-      }
-    end
 
     def redirect_uri
       options[:redirect_uri]

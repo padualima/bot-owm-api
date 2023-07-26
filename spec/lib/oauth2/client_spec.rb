@@ -12,6 +12,21 @@ RSpec.describe OAuth2::Client do
   subject { described_class.new(client_id: client_id, client_secret: client_secret, **options) }
 
   describe '#initialize' do
+    let(:default_options) do
+      {
+        redirect_uri: nil,
+        authorize_options: {
+          url: 'oauth/authorize'
+        },
+        token_options: {
+          method: :post,
+          url: 'oauth/token',
+          headers: { 'Content-Type' => 'application/x-www-form-urlencoded' }
+        },
+        logger: ::Logger.new($stdout)
+      }
+    end
+
     it 'initializes with empty client_id, client_secret and url' do
       client = described_class.new
 
@@ -23,7 +38,7 @@ RSpec.describe OAuth2::Client do
     it 'initializes with the default_options keys' do
       client = described_class.new
 
-      expect(client.options.keys).to eq(client.send(:default_options).keys)
+      expect(client.options.keys).to eq(default_options.keys)
     end
   end
 
@@ -99,14 +114,6 @@ RSpec.describe OAuth2::Client do
     it 'is an instance of faraday with url from provider' do
       expect(subject.connection).to be_a(Faraday::Connection)
       expect(subject.connection.url_prefix.to_s).to eq(provider_host)
-    end
-  end
-
-  describe '#default_options' do
-    it 'only specific defaults options' do
-      default_options = %i[authorize_url token_url redirect_uri logger]
-
-      expect(subject.send(:default_options).keys).to eq(default_options)
     end
   end
 
