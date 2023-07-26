@@ -13,9 +13,7 @@ module OAuth2
     end
 
     def provider(strategy, **opts)
-      opts.delete_if { |key, _| !key.in?(ALLOWED_OPTIONS) } if opts.any?
-
-      add_provider(strategy, **opts)
+      add_provider(strategy, **Utils.filter_hash_by_keys(opts, ALLOWED_OPTIONS))
     end
 
     def add_provider(strategy, **opts)
