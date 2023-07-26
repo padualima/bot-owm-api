@@ -31,9 +31,9 @@ module OAuth2
     end
 
     def authorize_url(params = {})
-      raise ArgumentError, '`params` is expected to be a Hash' unless params.is_a?(Hash)
+      validate_params(params)
 
-      connection.build_url(options[:authorize_url], authorize_url_params(params)).to_s
+      connection.build_url(authorize_options_url, authorize_url_params(params)).to_s
     end
 
     def connection
@@ -46,16 +46,20 @@ module OAuth2
 
     private
 
-    def redirect_uri
-      options[:redirect_uri]
+    def validate_params(params = {})
+      raise ArgumentError, '`params` is expected to be a Hash' unless params.is_a?(Hash)
     end
 
-    def redirect_uri_params
-      redirect_uri.present? ? { redirect_uri: redirect_uri } : {}
-    end
+    def redirect_uri = options[:redirect_uri]
 
-    def authorize_url_params(params)
-      redirect_uri_params.then { |param| param.merge(params.transform_keys(&:to_sym)) }
+    def authorize_options_url = options[:authorize_options][:url]
+
+    def redirect_uri_params = redirect_uri.present? ? { redirect_uri: redirect_uri } : {}
+
+    def authorize_url_params(params = {})
+      redirect_uri_params
+        .merge(Utils.symbolize_hash_keys(params))
+        .then { |params| Utils.stringify_hash_keys(params) }
     end
   end
 end

@@ -8,6 +8,7 @@ RSpec.describe OAuth2::Client do
   let(:provider_host) { 'http://example.com/' }
   let(:callback_uri) { 'http://example.com/auths/provider/callback' }
   let(:options) { { url: provider_host, redirect_uri: callback_uri } }
+  let(:authorize_options) { { url: 'oauth/authorize' } }
 
   subject { described_class.new(client_id: client_id, client_secret: client_secret, **options) }
 
@@ -15,9 +16,7 @@ RSpec.describe OAuth2::Client do
     let(:default_options) do
       {
         redirect_uri: nil,
-        authorize_options: {
-          url: 'oauth/authorize'
-        },
+        authorize_options: authorize_options,
         token_options: {
           method: :post,
           url: 'oauth/token',
@@ -52,7 +51,7 @@ RSpec.describe OAuth2::Client do
       expect(authorize_url).to be_a(String)
 
       expected_authorize_url =
-        "#{provider_host}#{subject.options[:authorize_url]}?" \
+        "#{provider_host}#{authorize_options[:url]}?" \
         "code=#{code}&redirect_uri=#{CGI.escape(callback_uri)}"
 
       expect(authorize_url).to eq(expected_authorize_url)
@@ -64,7 +63,7 @@ RSpec.describe OAuth2::Client do
       authorize_url = subject.authorize_url(params.merge(redirect_uri: another_callback_uri))
 
       expected_authorize_url =
-        "#{provider_host}#{subject.options[:authorize_url]}?" \
+        "#{provider_host}#{authorize_options[:url]}?" \
         "code=#{code}&redirect_uri=#{CGI.escape(another_callback_uri)}"
 
       expect(authorize_url).to eq(expected_authorize_url)
@@ -75,7 +74,7 @@ RSpec.describe OAuth2::Client do
 
       authorize_url = subject.authorize_url(params)
 
-      expected_authorize_url = "#{provider_host}#{subject.options[:authorize_url]}?code=#{code}"
+      expected_authorize_url = "#{provider_host}#{authorize_options[:url]}?code=#{code}"
 
       expect(authorize_url).to eq(expected_authorize_url)
     end
@@ -86,7 +85,7 @@ RSpec.describe OAuth2::Client do
       authorize_url = subject.authorize_url(params)
 
       expected_authorize_url =
-        "http:/#{subject.options[:authorize_url]}?" \
+        "http:/#{authorize_options[:url]}?" \
         "code=#{code}&redirect_uri=#{CGI.escape(callback_uri)}"
 
       expect(authorize_url).to eq(expected_authorize_url)
@@ -94,7 +93,7 @@ RSpec.describe OAuth2::Client do
 
     it 'builds a valid URL with a full authorize_url' do
       another_authorize_url = 'http://another.example.com/auths/oauth/authorize'
-      subject.options[:authorize_url] = another_authorize_url
+      subject.options[:authorize_options][:url] = another_authorize_url
 
       authorize_url = subject.authorize_url(params)
 
@@ -137,14 +136,20 @@ RSpec.describe OAuth2::Client do
     let(:redirect_uri_params) { { redirect_uri: subject.options[:redirect_uri] } }
     let(:code) { '12345' }
     let(:params) { { 'code' => code } }
-    let(:authorize_url_params) { redirect_uri_params.merge(params.transform_keys(&:to_sym)) }
+    let(:authorize_url_params) do
+      redirect_uri_params
+        .merge(params.transform_keys(&:to_sym))
+        .transform_keys(&:to_s)
+    end
 
-    it { expect(subject.send(:authorize_url_params, params)).to eq(authorize_url_params) }
+    it 'returns a redirect_uri and params Hash with stringify hash keys' do
+      expect(subject.send(:authorize_url_params, params)).to eq(authorize_url_params)
+    end
 
-    it 'no redirect url when not present' do
+    it 'returns only params with stringify hash keys when does not present redirect_uri' do
       subject.options.delete(:redirect_uri)
 
-      expect(subject.send(:authorize_url_params, params)).to eq(params.transform_keys(&:to_sym))
+      expect(subject.send(:authorize_url_params, params)).to eq(params.transform_keys(&:to_s))
     end
   end
 end
