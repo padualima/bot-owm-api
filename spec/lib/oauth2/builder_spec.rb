@@ -3,7 +3,17 @@
 require 'rails_helper'
 
 RSpec.describe OAuth2::Builder do
-  let(:options) { { client_id: 'abc123', client_secret: 'secret', url: 'http://example.com' } }
+  let(:options) do
+    {
+      client_id: 'abc123',
+      client_secret: 'secret',
+      url: 'http://example.com',
+      redirect_uri: 'http://callback.com',
+      authentication_scheme: :basic_auth,
+      authorize_options: { url: 'oauth/authorize' },
+      token_options: { url: 'oauth/token' }
+    }
+  end
 
   before { OAuth2::Configuration.instance.providers.clear }
 
