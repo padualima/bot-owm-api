@@ -40,7 +40,7 @@ RSpec.describe OAuth2::Builder do
     it 'only allows specific options to be included in the provider configuration' do
       opts = options.dup
       opts[:invalid_option] = 'foo'
-      described_class.new { provider(:my_provider, **opts)}
+      described_class.new { provider(:my_provider, **opts) }
 
       providers = OAuth2::Configuration.instance.providers
       expect(providers[:my_provider]).to eq(options)

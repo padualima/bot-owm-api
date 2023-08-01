@@ -3,9 +3,10 @@
 require 'rails_helper'
 
 RSpec.describe OAuth2::Client do
-  let(:client_id) { 'abc123' }
+  let(:client_id) { 'client_id' }
   let(:client_secret) { 'secret' }
   let(:provider_host) { 'http://example.com/' }
+  let(:authentication_scheme) { :basic_auth }
   let(:callback_uri) { 'http://example.com/auths/provider/callback' }
   let(:options) { { url: provider_host, redirect_uri: callback_uri } }
   let(:authorize_options) { { url: 'oauth/authorize' } }
@@ -16,23 +17,15 @@ RSpec.describe OAuth2::Client do
       headers: { 'Content-Type' => 'application/x-www-form-urlencoded' }
     }
   end
+  let(:redirect_uri_params) { { redirect_uri: callback_uri } }
 
-  subject { described_class.new(client_id: client_id, client_secret: client_secret, **options) }
-
-  describe 'Constants' do
-    it 'make sure the constant GET_TOKEN_ALLOWED_OPTIONS is defined' do
-      expect(defined?(OAuth2::Client::GET_TOKEN_ALLOWED_OPTIONS)).to be_truthy
-    end
-
-    it 'checks the value of the constant GET_TOKEN_ALLOWED_OPTIONS' do
-      expect(OAuth2::Client::GET_TOKEN_ALLOWED_OPTIONS).to eq(%i[url body])
-    end
-  end
+  subject { described_class.new(id: client_id, secret: client_secret, **options) }
 
   describe '#initialize' do
     let(:default_options) do
       {
         redirect_uri: nil,
+        authentication_scheme: authentication_scheme,
         authorize_options: authorize_options,
         token_options: token_options,
         logger: ::Logger.new($stdout)
@@ -42,9 +35,10 @@ RSpec.describe OAuth2::Client do
     it 'initializes with empty client_id, client_secret and url' do
       client = described_class.new
 
-      expect(client.client_id).to be_nil
-      expect(client.client_secret).to be_nil
+      expect(client.id).to be_nil
+      expect(client.id).to be_nil
       expect(client.url).to be_nil
+      expect(client.options.except(:logger)).to eq(default_options.except(:logger))
     end
 
     it 'initializes with the default_options keys' do
@@ -142,10 +136,51 @@ RSpec.describe OAuth2::Client do
     end
   end
 
+  describe '#auth_code' do
+    it 'returns an instance of OAuth2::Strategies::AuthCode' do
+      expect(subject.auth_code).to be_an_instance_of(OAuth2::Strategies::AuthCode)
+    end
+
+    it 'passes self as an argument to the AuthCode strategy' do
+      auth_code_strategy = instance_double(OAuth2::Strategies::AuthCode)
+      expect(OAuth2::Strategies::AuthCode).to receive(:new).with(subject).and_return(auth_code_strategy)
+      expect(subject.auth_code).to eq(auth_code_strategy)
+    end
+  end
+
   describe '#connection' do
     it 'is an instance of faraday with url from provider' do
       expect(subject.connection).to be_a(Faraday::Connection)
       expect(subject.connection.url_prefix.to_s).to eq(provider_host)
+    end
+  end
+
+  describe '#validate_params' do
+    it 'raises ArgumentError when params is not a Hash' do
+      expect { subject.send(:validate_params, 'not_a_hash') }
+        .to raise_error(ArgumentError, /`params` is expected to be a Hash/)
+    end
+
+    it 'does not raise ArgumentError when params is a Hash' do
+      expect { subject.send(:validate_params, { key: 'value' }) }.not_to raise_error
+    end
+
+    it 'does not raise ArgumentError when params is an empty Hash' do
+      expect { subject.send(:validate_params, {}) }.not_to raise_error
+    end
+  end
+
+  describe '#authenticator' do
+    it 'returns an instance of OAuth2::Authenticator' do
+      expect(subject.send(:authenticator)).to be_an_instance_of(OAuth2::Authenticator)
+    end
+
+    it 'passes the correct arguments to the Authenticator constructor' do
+      authenticator = instance_double(OAuth2::Authenticator)
+      expect(OAuth2::Authenticator).to receive(:new)
+        .with(client_id, client_secret, authentication_scheme)
+        .and_return(authenticator)
+      expect(subject.send(:authenticator)).to eq(authenticator)
     end
   end
 
@@ -193,60 +228,64 @@ RSpec.describe OAuth2::Client do
     end
   end
 
-  describe '#authorize_url_params' do
-    let(:redirect_uri_params) { { redirect_uri: subject.options[:redirect_uri] } }
+  describe '#merge_base_and_transform_params' do
     let(:code) { '12345' }
     let(:params) { { 'code' => code } }
-    let(:authorize_url_params) do
+    let(:merge_base_and_transform_params) do
       redirect_uri_params
         .merge(params.transform_keys(&:to_sym))
         .transform_keys(&:to_s)
     end
 
     it 'returns a redirect_uri and params Hash with stringify hash keys' do
-      expect(subject.send(:authorize_url_params, params)).to eq(authorize_url_params)
+      expect(subject.send(:merge_base_and_transform_params, params)).to eq(merge_base_and_transform_params)
     end
 
     it 'returns only params with stringify hash keys when does not present redirect_uri' do
       subject.options.delete(:redirect_uri)
 
-      expect(subject.send(:authorize_url_params, params)).to eq(params.transform_keys(&:to_s))
+      expect(subject.send(:merge_base_and_transform_params, params)).to eq(params.transform_keys(&:to_s))
     end
   end
 
-  describe '#get_token_options' do
+  describe '#build_authorize_params' do
+    let(:params) { { scope: 'read', response_type: 'code' } }
+    let(:response) { { 'redirect_uri' => callback_uri, 'scope' => 'read', 'response_type' => 'code' } }
+
+    it 'merges and transforms the params correctly' do
+      expect(subject.send(:build_authorize_params, params)).to eq(response)
+    end
+  end
+
+  describe '#build_token_request_options' do
     let(:code) { '12345' }
     let(:params) { { code: code } }
-    let(:get_token_default_options) do
+    let(:build_params) do
+      redirect_uri_params.merge(params.transform_keys(&:to_s)).transform_keys(&:to_s)
+    end
+    let(:build_headers) do
+      OAuth2::Authenticator
+        .new(client_id, client_secret, authentication_scheme)
+        .apply!(build_params, token_options[:headers])
+    end
+    let(:build_token_request_options) do
       {
         method: token_options[:method],
         url: token_options[:url],
-        body: params.transform_keys(&:to_s),
-        headers: token_options[:headers]
+        body: build_params,
+        headers: build_headers
       }
+    end
+
+    before do
+      allow_any_instance_of(OAuth2::Authenticator).to receive(:basic_auth_header)
+        .and_return(token_options[:headers].merge('Authorization' => 'Basic Auth'))
     end
 
     it 'returns defaults options without options args' do
-      expect(subject.send(:get_token_options, params)).to eq(get_token_default_options)
-      expect(subject.send(:get_token_options, params).keys).to all(be_a(Symbol))
-      expect(subject.send(:get_token_options, params)[:body].keys).to all(be_a(String))
-    end
-
-    it 'returns with replaced URL and body' do
-      replaced_options = {
-        url: 'http://another.example.com/auths/oauth/tokens',
-        body: { code: code, grant_type: 'authorization_code' }
-      }
-
-      get_token_default_options[:url] = replaced_options[:url]
-      get_token_default_options[:body] = replaced_options[:body].transform_keys(&:to_s)
-
-      expect(subject.send(:get_token_options, params, replaced_options))
-        .to eq(get_token_default_options)
-      expect(subject.send(:get_token_options, params, replaced_options).keys)
-        .to all(be_a(Symbol))
-      expect(subject.send(:get_token_options, params, replaced_options)[:body].keys)
-        .to all(be_a(String))
+      expect(subject.send(:build_token_request_options, params)).to eq(build_token_request_options)
+      expect(subject.send(:build_token_request_options, params).keys).to all(be_a(Symbol))
+      expect(subject.send(:build_token_request_options, params)[:body].keys).to all(be_a(String))
     end
   end
 
