@@ -47,4 +47,48 @@ RSpec.describe OAuth2::Utils do
       expect(subject).to eq(params.transform_keys(&:to_sym))
     end
   end
+
+  describe '#build_oauth2_client' do
+    let(:provider) { :twitter }
+    let(:provider_opts) do
+      {
+        client_id: 'example_client_id',
+        client_secret: 'example_client_secret',
+        authorize_url: 'example_authorize_url',
+        token_url: 'example_token_url'
+      }
+    end
+    let(:configuration_instance) { instance_double(OAuth2::Configuration, providers: { provider.to_sym => provider_opts }) }
+
+    before do
+      allow(OAuth2::Configuration).to receive(:instance).and_return(configuration_instance)
+    end
+
+    it 'returns an instance of OAuth2::Client' do
+      client = described_class.build_oauth2_client(provider)
+      expect(client).to be_an_instance_of(OAuth2::Client)
+    end
+
+    it 'sets the correct client_id and client_secret' do
+      client = described_class.build_oauth2_client(provider)
+      expect(client.id).to eq(provider_opts[:client_id])
+      expect(client.secret).to eq(provider_opts[:client_secret])
+    end
+
+    it 'sets the provider options correctly' do
+      client = described_class.build_oauth2_client(provider)
+      expect(client.options[:authorize_url]).to eq(provider_opts[:authorize_url])
+      expect(client.options[:token_url]).to eq(provider_opts[:token_url])
+    end
+
+    it 'does not modify the original provider_opts' do
+      described_class.build_oauth2_client(provider)
+      expect(provider_opts).to eq({
+        client_id: 'example_client_id',
+        client_secret: 'example_client_secret',
+        authorize_url: 'example_authorize_url',
+        token_url: 'example_token_url'
+      })
+    end
+  end
 end
