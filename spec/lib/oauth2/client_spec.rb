@@ -36,7 +36,7 @@ RSpec.describe OAuth2::Client do
       client = described_class.new
 
       expect(client.id).to be_nil
-      expect(client.id).to be_nil
+      expect(client.secret).to be_nil
       expect(client.url).to be_nil
       expect(client.options.except(:logger)).to eq(default_options.except(:logger))
     end
