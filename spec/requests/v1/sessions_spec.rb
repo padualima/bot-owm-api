@@ -88,6 +88,40 @@ RSpec.describe "V1::Sessions", type: :request do
   end
 
   describe "GET /authorize" do
+    let(:code_verifier) { 'code_verifier' }
+    let(:code_challenge) { 'code_challenge' }
+    let(:client_id) { 'example_client_id' }
+    let(:client_secret) { 'example_client_secret' }
+    let(:provider_host) { 'http://example.com/' }
+    let(:callback_uri) { 'http://example.com/auths/provider/callback' }
+    let(:authorize_options) { { url: 'oauth/authorize' } }
+    let(:token_options) do
+      {
+        method: :post,
+        url: 'oauth/token',
+        headers: { 'Content-Type' => 'application/x-www-form-urlencoded' }
+      }
+    end
+    let(:options) do
+      {
+        client_id: client_id,
+        client_secret: client_secret,
+        url: provider_host,
+        redirect_uri: callback_uri,
+        authorize_options: authorize_options
+      }
+    end
+
+    before do
+      OAuth2::Configuration.instance.providers.clear
+
+      opts = options.dup
+      OAuth2::Builder.new { provider(:twitter, **opts) }
+
+      allow(OAuth2::Twitter).to receive(:code_verifier).and_return(code_verifier)
+      allow(OAuth2::Twitter).to receive(:code_challenge).and_return(code_challenge)
+    end
+
     it "returns http success" do
       get authorize_path
       expect(response).to have_http_status(:success)
@@ -100,25 +134,22 @@ RSpec.describe "V1::Sessions", type: :request do
     end
 
     it "return a mesasge data with valid authorize_url" do
-      code_verifier = Helpers.generate_code_verifier
-      code_challenge = Helpers.generate_code_challenge(code_verifier)
-      authorize_url = Helpers
-        .generate_authorize_url(state: code_verifier, code_challenge: code_challenge)
-
-      allow(Clients::Twitter::Utils::PKCE).to receive(:code_verifier).and_return(code_verifier)
-      allow(Clients::Twitter::Utils::PKCE).to receive(:code_challenge)
-        .with(code_verifier)
-        .and_return(code_challenge)
-
       get authorize_path
 
-      expect(response.parsed_body["data"]["message"]).to eql(authorize_url)
+      message_data = response.parsed_body["data"]["message"]
+
+      expect(message_data).to include("client_id=#{client_id}")
+      expect(message_data).to include("state=#{code_verifier}")
+      expect(message_data).to include("code_challenge=#{code_challenge}")
+      expect(message_data).to include("scope=tweet.read+users.read+tweet.write+offline.access")
+      expect(message_data).to include('response_type=code')
+      expect(message_data).to include('code_challenge_method=S256')
     end
   end
 
   describe "GET /callback" do
     context "when receive twitter callback" do
-      let(:state) { Helpers.generate_code_verifier }
+      let(:state) { 'code_verifier' }
       let(:code) { SecureRandom.hex(10) }
       let(:twitter_callback) { callback_path(:twitter2, code: code, state: state) }
 

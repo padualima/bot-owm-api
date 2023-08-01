@@ -12,7 +12,7 @@ module Helpers
   def generate_authorize_url(client_id: ENV['TWITTER_CLIENT_ID'], state:, code_challenge:)
     authorize_url = ENV['TWITTER_AUTHORIZE_URL']
     callback_url = Rails.application.routes.url_helpers.url_for([:callback, provider: :twitter2])
-    scopes = Clients::Twitter::V2::Utils.scopes
+    scopes = ["tweet.read", "users.read", "tweet.write", "offline.access"].join('+')
 
     "#{authorize_url}?client_id=#{client_id}&redirect_uri=#{callback_url}&state=#{state}&" \
     "code_challenge=#{code_challenge}&scope=#{scopes}&response_type=code&code_challenge_method=S256"
