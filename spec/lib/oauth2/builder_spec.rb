@@ -3,7 +3,17 @@
 require 'rails_helper'
 
 RSpec.describe OAuth2::Builder do
-  let(:options) { { client_id: 'abc123', client_secret: 'secret', url: 'http://example.com' } }
+  let(:options) do
+    {
+      client_id: 'abc123',
+      client_secret: 'secret',
+      url: 'http://example.com',
+      redirect_uri: 'http://callback.com',
+      authentication_scheme: :basic_auth,
+      authorize_options: { url: 'oauth/authorize' },
+      token_options: { url: 'oauth/token' }
+    }
+  end
 
   before { OAuth2::Configuration.instance.providers.clear }
 
@@ -30,7 +40,7 @@ RSpec.describe OAuth2::Builder do
     it 'only allows specific options to be included in the provider configuration' do
       opts = options.dup
       opts[:invalid_option] = 'foo'
-      described_class.new { provider(:my_provider, **opts)}
+      described_class.new { provider(:my_provider, **opts) }
 
       providers = OAuth2::Configuration.instance.providers
       expect(providers[:my_provider]).to eq(options)

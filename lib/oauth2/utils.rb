@@ -17,5 +17,14 @@ module OAuth2
     def symbolize_hash_keys(params = {})
       params.transform_keys(&:to_sym)
     end
+
+    def build_oauth2_client(provider)
+      provider_opts = OAuth2::Configuration.instance.providers[provider.to_sym].dup
+
+      client_id = provider_opts.delete(:client_id)
+      client_secret = provider_opts.delete(:client_secret)
+
+      OAuth2::Client.new(id: client_id, secret: client_secret, **provider_opts)
+    end
   end
 end

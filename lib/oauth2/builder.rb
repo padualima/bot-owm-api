@@ -2,7 +2,15 @@
 
 module OAuth2
   class Builder
-    ALLOWED_OPTIONS = %i[client_id client_secret url authorize_url token_url redirect_uri]
+    ALLOWED_OPTIONS = %i[
+      client_id
+      client_secret
+      url
+      redirect_uri
+      authentication_scheme
+      authorize_options
+      token_options
+    ]
 
     def self.configure(&block)
       new(&block)

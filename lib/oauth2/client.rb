@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require 'json'
+require 'faraday'
 
 module OAuth2
   AccessTokenResponse = Class.new(Struct.new(:status, :body))
@@ -8,24 +9,23 @@ module OAuth2
   TimeoutError = Class.new(Faraday::TimeoutError)
 
   class Client
-    GET_TOKEN_ALLOWED_OPTIONS = %i[url body]
-
-    attr_reader :client_id, :client_secret, :url
+    attr_reader :id, :secret, :url
     attr_accessor :options
     attr_writer :connection
 
-    # @param [String] client_id the provider client_id key
-    # @param [String] client_secret the provider client_secret key
+    # @param [String] id the provider id key
+    # @param [String] secret the provider secret key
     # @param [String] url the host of the provider
     # @param [Symbol] options the options of connection builder
-    def initialize(client_id: nil, client_secret: nil, **options)
+    def initialize(id: nil, secret: nil, **options)
       opts = Utils.symbolize_hash_keys(options.dup)
 
-      @client_id = client_id
-      @client_secret = client_secret
+      @id = id
+      @secret = secret
       @url = opts.delete(:url)
       @options = {
         redirect_uri: nil,
+        authentication_scheme: :basic_auth,
         authorize_options: {
           url: 'oauth/authorize'
         },
@@ -41,14 +41,19 @@ module OAuth2
     def authorize_url(params = {})
       validate_params(params)
 
-      connection.build_url(authorize_options_url, authorize_url_params(params)).to_s
+      connection.build_url(authorize_options_url, build_authorize_params(params)).to_s
     end
 
     # @param [Hash] params the necessary parameters to make the get token request
     # @param [Symbol] options allows overriding request options with GET_TOKEN_ALLOWED_OPTIONS
-    def get_token(params = {}, **options)
+    def get_token(params = {})
       validate_params(params)
-      request(*get_token_options(params, options).keys)
+
+      request(*build_token_request_options(params).values)
+    end
+
+    def auth_code
+      Strategies::AuthCode.new(self)
     end
 
     def connection
@@ -60,6 +65,10 @@ module OAuth2
     end
 
     private
+
+    def authenticator
+      Authenticator.new(id, secret, options[:authentication_scheme])
+    end
 
     def validate_params(params = {})
       raise ArgumentError, '`params` is expected to be a Hash' unless params.is_a?(Hash)
@@ -77,21 +86,28 @@ module OAuth2
 
     def redirect_uri_params = redirect_uri.present? ? { redirect_uri: redirect_uri } : {}
 
-    def authorize_url_params(params = {})
+    def merge_base_and_transform_params(params)
       redirect_uri_params
         .merge(Utils.symbolize_hash_keys(params))
         .then { |params| Utils.stringify_hash_keys(params) }
     end
 
-    def get_token_options(params = {}, options = {})
+    def build_authorize_params(params = {})
+      merge_base_and_transform_params(params)
+    end
+
+    def build_token_request_options(params = {})
+      params = merge_base_and_transform_params(params)
+      headers = token_options_headers
+
+      authenticator.apply!(params, headers)
+
       {
         method: token_options_method,
         url: token_options_url,
         body: params,
-        headers: token_options_headers
+        headers: headers
       }
-        .merge(Utils.filter_hash_by_keys(options, GET_TOKEN_ALLOWED_OPTIONS))
-        .tap { |opts| opts[:body] = Utils.stringify_hash_keys(opts[:body]) }
     end
 
     def request(method, url, body, headers)
