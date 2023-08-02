@@ -1,10 +1,8 @@
 # frozen_string_literal: true
 
-require 'json'
 require 'faraday'
 
 module OAuth2
-  AccessTokenResponse = Class.new(Struct.new(:status, :body))
   ConnectionError = Class.new(Faraday::ConnectionFailed)
   TimeoutError = Class.new(Faraday::TimeoutError)
 
@@ -23,17 +21,19 @@ module OAuth2
       @id = id
       @secret = secret
       @url = opts.delete(:url)
+      authorize_options = {
+        url: 'oauth/authorize'
+      }.merge(opts.delete(:authorize_options))
+      token_options = {
+        method: :post,
+        url: 'oauth/token',
+        headers: { 'Content-Type' => 'application/x-www-form-urlencoded' }
+      }.merge(opts.delete(:token_options))
       @options = {
         redirect_uri: nil,
         authentication_scheme: :basic_auth,
-        authorize_options: {
-          url: 'oauth/authorize'
-        },
-        token_options: {
-          method: :post,
-          url: 'oauth/token',
-          headers: { 'Content-Type' => 'application/x-www-form-urlencoded' }
-        },
+        authorize_options: authorize_options,
+        token_options: token_options,
         logger: ::Logger.new($stdout)
       }.merge(opts)
     end
@@ -111,14 +111,6 @@ module OAuth2
     end
 
     def request(method, url, body, headers)
-      response = run_request(method, url, body, headers)
-
-      return response unless response&.status&.in?(200..599)
-
-      AccessTokenResponse.new(status: response.status, body: JSON.parse(response.body))
-    end
-
-    def run_request(method, url, body, headers)
       connection.run_request(method, url, body, headers)
     rescue Faraday::ConnectionFailed => e
       raise ConnectionError, e

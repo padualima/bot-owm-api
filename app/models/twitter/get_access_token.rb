@@ -5,7 +5,7 @@ class Twitter::GetAccessToken < ::Micro::Case
   attribute :code, default: -> value { value.to_s.strip }
 
   def call!
-    res = Clients::Twitter::OAuth2.new.access_token(state, code)
+    res = OAuth2::Twitter.access_token(state, code)
 
     return Success result: res.body if res.status.eql?(200)
 
