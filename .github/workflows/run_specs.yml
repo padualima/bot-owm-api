@@ -35,6 +35,7 @@ jobs:
       TWITTER_CLIENT_ID: YOUR_CLIENT_ID
       TWITTER_CLIENT_SECRET: YOUR_CLIENT_SECRET
       TWITTER_CALLBACK_URL: http://localhost:3000/auths/twitter2/callback
+      TWITTER_SCOPES_AUTH: "tweet.read users.read tweet.write offline.access"
       OPEN_WEATHER_MAP_API_KEY: YOUR_OPEN_WEATHER_MAP_API_KEY
       OPEN_WEATHER_MAP_API_URL: https://api.openweathermap.org
     steps:
