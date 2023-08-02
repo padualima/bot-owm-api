@@ -32,6 +32,7 @@ jobs:
       DATABASE_PASSWORD: postgres
       TWITTER_BASE_URL_V2: https://api.twitter.com/2
       TWITTER_AUTHORIZE_URL: https://twitter.com/i/oauth2/authorize
+      TWITTER_TOKEN_URL: https://api.twitter.com/2/oauth2/token
       TWITTER_CLIENT_ID: YOUR_CLIENT_ID
       TWITTER_CLIENT_SECRET: YOUR_CLIENT_SECRET
       TWITTER_CALLBACK_URL: http://localhost:3000/auths/twitter2/callback
