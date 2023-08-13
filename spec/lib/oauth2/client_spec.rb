@@ -303,6 +303,7 @@ RSpec.describe OAuth2::Client do
 
       response = subject.send(:request, method, url, body, headers)
 
+      expect(response).to be_instance_of(OAuth2::Client::Response)
       expect(response.status).to eq(200)
       expect(response.body).to have_key('token')
       expect(response.body['token']).to eq('Token')
@@ -337,51 +338,29 @@ RSpec.describe OAuth2::Client do
     end
   end
 
-  describe '#run_request' do
-    let(:method) { :post }
-    let(:url) { 'http://example.com/' }
-    let(:body) { URI.encode_www_form({ 'param_1' => 'value_1' }) }
-    let(:headers) { { 'Content-Type' => 'application/json' } }
+  context "handle_response_body" do
+    it "parses JSON response body" do
+      response_body = { "key" => "value" }.to_json
 
-    it 'returns with success response' do
-      mock_response =
-        instance_double(Faraday::Response, body: { token: 'Token' }.to_json, status: 200)
+      parsed_body = subject.send(:handle_response_body, response_body)
 
-      allow(subject.connection).to receive(:run_request).and_return(mock_response)
-
-      response = subject.send(:run_request, method, url, body, headers)
-
-      expect(response.status).to eq(200)
-      expect(JSON.parse(response.body)).to have_key('token')
-      expect(JSON.parse(response.body)['token']).to eq('Token')
+      expect(parsed_body).to eq({ "key" => "value" })
     end
 
-    context 'when errors are raised by Faraday' do
-      before  { allow(subject.connection).to receive(:run_request).and_raise(faraday_exception) }
+    it "returns the original body if it's not a string" do
+      response_body = { "key" => "value" }
 
-      shared_examples 'failed connection handler' do
-        it 'rescues the exception' do
-          expect { subject.send(:run_request, method, url, body, headers) }
-            .to raise_error do |e|
-              expect(e.message).to eq(faraday_exception.message)
-              expect(e.class).to eq(expected_exception)
-            end
-        end
-      end
+      parsed_body = subject.send(:handle_response_body, response_body)
 
-      context 'with Faraday::ConnectionFailed' do
-        let(:faraday_exception) { Faraday::ConnectionFailed.new('fail') }
-        let(:expected_exception) { OAuth2::ConnectionError }
+      expect(parsed_body).to eq(response_body)
+    end
 
-        it_behaves_like 'failed connection handler'
-      end
+    it "returns the original body if parsing as JSON fails" do
+      response_body = "<html><body>Error</body></html>"
 
-      context 'with Faraday::TimeoutError' do
-        let(:faraday_exception) { Faraday::TimeoutError.new('timeout') }
-        let(:expected_exception) { OAuth2::TimeoutError }
+      parsed_body = subject.send(:handle_response_body, response_body)
 
-        it_behaves_like 'failed connection handler'
-      end
+      expect(parsed_body).to eq(response_body)
     end
   end
 end

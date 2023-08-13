@@ -7,6 +7,8 @@ module OAuth2
   TimeoutError = Class.new(Faraday::TimeoutError)
 
   class Client
+    Response = Struct.new(:status, :body)
+
     attr_reader :id, :secret, :url
     attr_accessor :options
     attr_writer :connection
@@ -23,12 +25,12 @@ module OAuth2
       @url = opts.delete(:url)
       authorize_options = {
         url: 'oauth/authorize'
-      }.merge(opts.delete(:authorize_options))
+      }.merge(opts.delete(:authorize_options) || {})
       token_options = {
         method: :post,
         url: 'oauth/token',
         headers: { 'Content-Type' => 'application/x-www-form-urlencoded' }
-      }.merge(opts.delete(:token_options))
+      }.merge(opts.delete(:token_options) || {})
       @options = {
         redirect_uri: nil,
         authentication_scheme: :basic_auth,
@@ -48,7 +50,6 @@ module OAuth2
     # @param [Symbol] options allows overriding request options with GET_TOKEN_ALLOWED_OPTIONS
     def get_token(params = {})
       validate_params(params)
-
       request(*build_token_request_options(params).values)
     end
 
@@ -111,11 +112,21 @@ module OAuth2
     end
 
     def request(method, url, body, headers)
-      connection.run_request(method, url, body, headers)
+      connection
+        .run_request(method, url, body, headers)
+        .then { |res| Response.new(res.status, handle_response_body(res.body)) }
     rescue Faraday::ConnectionFailed => e
       raise ConnectionError, e
     rescue Faraday::TimeoutError => e
       raise TimeoutError, e
+    end
+
+    def handle_response_body(body)
+      body unless body.is_a?(String)
+
+      JSON.parse(body)
+    rescue
+      body
     end
   end
 end
