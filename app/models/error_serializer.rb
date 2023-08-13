@@ -7,7 +7,7 @@ class ErrorSerializer
   end
 
   FriendlyMessage = -> data do
-    return data.join if data.one?
+    return data.join if data.one? || data.blank?
 
     data.take(data.count-1).join(", ") << " and #{data.last}"
   end

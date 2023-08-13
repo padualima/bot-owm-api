@@ -28,6 +28,8 @@ RSpec.describe OAuth2::Strategies::AuthCode do
 
   before { OAuth2::Configuration.instance.providers.clear }
 
+  after { OAuth2::Configuration.instance.providers.clear }
+
   subject { described_class.new(client) }
 
   describe '#authorize_url' do
@@ -54,10 +56,10 @@ RSpec.describe OAuth2::Strategies::AuthCode do
 
   describe '#get_token' do
     before do
-      mock_response =
-        instance_double(Faraday::Response, body: { token: 'Token' }.to_json, status: 200)
-
-      allow_any_instance_of(OAuth2::Client).to receive(:run_request).and_return(mock_response)
+      allow_any_instance_of(OAuth2::Client).to receive(:request)
+        .and_return(
+          instance_double(OAuth2::Client::Response, body: { token: 'Token' }, status: 200)
+        )
     end
 
     it 'does not raises ArgumentError if client_secret is present in params' do
@@ -68,14 +70,14 @@ RSpec.describe OAuth2::Strategies::AuthCode do
     it 'returns the correct access token params with default code' do
       access_token_params = subject.get_token('example_code')
 
-      expect(access_token_params.body['token']).to eq('Token')
+      expect(access_token_params.body[:token]).to eq('Token')
       expect(access_token_params.status).to eq(200)
     end
 
     it 'returns the correct access token params with custom params' do
       access_token_params = subject.get_token('example_code', custom_param: 'custom_value')
 
-      expect(access_token_params.body['token']).to eq('Token')
+      expect(access_token_params.body[:token]).to eq('Token')
       expect(access_token_params.status).to eq(200)
     end
   end

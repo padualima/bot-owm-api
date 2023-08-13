@@ -6,9 +6,9 @@ module Clients
       module Base
         extend self
 
-        def api_key = ENV['OPEN_WEATHER_MAP_API_KEY']
+        def api_key = ENV.fetch('OPEN_WEATHER_MAP_API_KEY')
 
-        def api_url = ENV['OPEN_WEATHER_MAP_API_URL']
+        def api_url = ENV.fetch('OPEN_WEATHER_MAP_API_URL')
 
         def client
           Faraday.new(api_url) do |client|
@@ -21,7 +21,17 @@ module Clients
         def call(method:, endpoint:, body: {})
           body = body.merge!(appid: api_key).as_json
 
-          client.public_send(method, endpoint, body)
+          res = client.public_send(method, endpoint, body)
+
+          OpenStruct.new(status: res.status, body: handle_response_body(res.body))
+        end
+
+        def handle_response_body(body)
+          body unless body.is_a?(String)
+
+          JSON.parse(body)
+        rescue
+          body
         end
       end
     end

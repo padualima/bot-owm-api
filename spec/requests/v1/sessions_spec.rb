@@ -26,6 +26,40 @@ RSpec.describe "V1::Sessions", type: :request, swagger_doc: 'v1/swagger.yaml' do
       tags 'Sessions'
       produces 'application/json'
 
+      let(:client_id) { 'example_client_id' }
+      let(:client_secret) { 'example_client_secret' }
+      let(:provider_host) { TWITTER_BASE_URL }
+      let(:callback_uri) { 'http://example.com/auths/provider/callback' }
+      let(:authorize_options) { { url: 'oauth/authorize' } }
+      let(:token_options) do
+        {
+          method: :post,
+          url: 'oauth2/token',
+          headers: { 'Content-Type' => 'application/x-www-form-urlencoded' }
+        }
+      end
+      let(:options) do
+        {
+          client_id: client_id,
+          client_secret: client_secret,
+          url: provider_host,
+          redirect_uri: callback_uri,
+          authorize_options: authorize_options,
+          token_options: token_options
+        }
+      end
+
+      before do
+        OAuth2::Configuration.instance.providers.clear
+
+        opts = options.dup
+        OAuth2::Builder.new { provider(:twitter, **opts) }
+      end
+
+      after do
+        OAuth2::Configuration.instance.providers.clear
+      end
+
       response(200, 'Successful') do
         before do
           StubRequest

@@ -8,7 +8,7 @@ module V1
       return head :not_found unless @api_token
 
       input = tweet_params.to_h
-      input[:location_name] = input.delete(:name)
+      input[:location_name] = input.delete(:name) if input.key?(:name)
 
       Tweet::CreateWithWeatherInformation
         .call(**input, api_token: @api_token)
