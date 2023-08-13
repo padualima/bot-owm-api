@@ -11,7 +11,7 @@ module MockTwitterResponse
         access_token: access_token,
         scope: "tweet.write users.read tweet.read offline.access",
         refresh_token: SecureRandom.hex(10)
-      }.as_json
+      }.to_json
     end
   end
 
@@ -25,7 +25,7 @@ module MockTwitterResponse
           name: Faker::Name.name,
           username: Faker::Internet.username(specifier: 5..10)
         }
-      }.as_json
+      }.to_json
     end
   end
 

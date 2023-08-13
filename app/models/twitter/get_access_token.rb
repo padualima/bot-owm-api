@@ -9,7 +9,7 @@ class Twitter::GetAccessToken < ::Micro::Case
 
     return Success result: res.body if res.status.eql?(200)
 
-    message = ErrorSerializer.new(res.body['error_description'], 422)
+    message = ErrorSerializer.new(res.body, 422)
 
     Failure :oauth_failed, result: { message: message }
   end

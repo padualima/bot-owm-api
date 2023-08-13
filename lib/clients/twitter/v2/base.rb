@@ -22,7 +22,9 @@ module Clients
           body = body.present? ? body.to_json : nil
 
           client.params = params
-          client.public_send(method, endpoint, body, extra_headers)
+          res = client.public_send(method, endpoint, body, extra_headers)
+
+          OpenStruct.new(status: res.status, body: handle_response_body(res.body))
         end
 
         private
@@ -34,6 +36,14 @@ module Clients
             client.adapter Faraday.default_adapter
             client.headers['Authorization'] = "Bearer #{oauth_token}" if oauth_token.present?
           end
+        end
+
+        def handle_response_body(body)
+          body unless body.is_a?(String)
+
+          JSON.parse(body)
+        rescue
+          body
         end
       end
     end
