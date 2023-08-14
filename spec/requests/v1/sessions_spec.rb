@@ -62,19 +62,17 @@ RSpec.describe "V1::Sessions", type: :request, swagger_doc: 'v1/swagger.yaml' do
 
       response(200, 'Successful') do
         before do
-          StubRequest
-            .post(
-              url: TWITTER_BASE_URL,
-              path: 'oauth2/token',
-              response: MockResponse::Twitter::OAuth2.access_token_data
-            )
+          StubRequest.post(
+            url: TWITTER_BASE_URL,
+            path: 'oauth2/token',
+            response: MockResponse::Twitter::OAuth2.access_token_data
+          )
 
-          StubRequest
-            .get(
-              url: TWITTER_BASE_URL,
-              path: 'users/me',
-              response: MockResponse::Twitter::Users.me_data
-            )
+          StubRequest.get(
+            url: TWITTER_BASE_URL,
+            path: 'users/me',
+            response: MockResponse::Twitter::Users.me_data
+          )
         end
 
         run_test!
@@ -82,8 +80,7 @@ RSpec.describe "V1::Sessions", type: :request, swagger_doc: 'v1/swagger.yaml' do
 
       response(422, 'Unprocessable Entity') do
         before do
-          StubRequest
-          .post(
+          StubRequest.post(
             url: TWITTER_BASE_URL,
             path: 'oauth2/token',
             response: { status: 500 }

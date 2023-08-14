@@ -1,13 +1,9 @@
 # frozen_string_literal: true
 
-require_relative 'utils'
-
 module Clients
   module Twitter
     module V2
       class Base
-        include Utils
-
         attr_reader :client_id, :client_secret
 
         attr_accessor :oauth_token
@@ -30,7 +26,7 @@ module Clients
         private
 
         def client
-          @client ||= Faraday.new(twitter_base_url) do |client|
+          @client ||= Faraday.new(ENV['TWITTER_BASE_URL_V2']) do |client|
             client.request :json
             client.response :json
             client.adapter Faraday.default_adapter

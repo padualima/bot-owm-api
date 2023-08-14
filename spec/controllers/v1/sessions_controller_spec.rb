@@ -78,8 +78,7 @@ RSpec.describe V1::SessionsController do
 
       context "when invalid authorization code" do
         before do
-          StubRequest
-            .post(url: TWITTER_BASE_URL, path: 'oauth2/token', response: { status: 500 })
+          StubRequest.post(url: TWITTER_BASE_URL, path: 'oauth2/token', response: { status: 500 })
         end
 
         it do
@@ -104,19 +103,17 @@ RSpec.describe V1::SessionsController do
       context "when valid authorization code" do
         context "when the user not exist" do
           before do
-            StubRequest
-              .post(
-                url: TWITTER_BASE_URL,
-                path: 'oauth2/token',
-                response: MockResponse::Twitter::OAuth2.access_token_data
-              )
+            StubRequest.post(
+              url: TWITTER_BASE_URL,
+              path: 'oauth2/token',
+              response: MockResponse::Twitter::OAuth2.access_token_data
+            )
 
-            StubRequest
-              .get(
-                url: TWITTER_BASE_URL,
-                path: 'users/me',
-                response: MockResponse::Twitter::Users.me_data
-              )
+            StubRequest.get(
+              url: TWITTER_BASE_URL,
+              path: 'users/me',
+              response: MockResponse::Twitter::Users.me_data
+            )
           end
 
           it do
@@ -138,20 +135,18 @@ RSpec.describe V1::SessionsController do
           let(:access_token) { new_api_token_event.access_token }
 
           before do
-            StubRequest
-              .post(
-                url: TWITTER_BASE_URL,
-                path: 'oauth2/token',
-                response: MockResponse::Twitter::OAuth2
-                  .access_token_data(access_token: access_token)
-              )
+            StubRequest.post(
+              url: TWITTER_BASE_URL,
+              path: 'oauth2/token',
+              response: MockResponse::Twitter::OAuth2
+                .access_token_data(access_token: access_token)
+            )
 
-            StubRequest
-              .get(
-                url: TWITTER_BASE_URL,
-                path: 'users/me',
-                response: MockResponse::Twitter::Users.me_data(id: user.uid)
-              )
+            StubRequest.get(
+              url: TWITTER_BASE_URL,
+              path: 'users/me',
+              response: MockResponse::Twitter::Users.me_data(id: user.uid)
+            )
           end
 
           it "return new token" do
