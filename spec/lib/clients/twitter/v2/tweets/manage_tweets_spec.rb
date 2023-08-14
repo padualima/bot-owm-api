@@ -15,17 +15,14 @@ describe Clients::Twitter::V2::Tweets::ManageTweets do
       subject { ::Clients::Twitter::V2::Tweets::ManageTweets.new(oauth_token: oauth_token) }
 
       before do
-        allow_any_instance_of(Faraday::Connection).to receive(:post)
-          .and_return(
-            instance_double(
-              Faraday::Response,
-              body: MockTwitterResponse::Tweets.tweet_published_data(text: text),
-              status: 200
-            )
-          )
+        StubRequest.post(
+          url: TWITTER_BASE_URL,
+          path: 'tweets',
+          response: MockResponse::Twitter::Tweets.tweet_published_data(text: text)
+        )
       end
 
-      it { expect(subject.new_tweet(text).status).to eql(200) }
+      it { expect(subject.new_tweet(text).status).to eql(201) }
       it { expect(subject.new_tweet(text).body['data']['text']).to eql(text) }
     end
   end

@@ -33,7 +33,7 @@ class User::RegisterInTwitterCallback < ::Micro::Case
   end
 
   def twitter_user_lookup(access_token_data:, **)
-    user_info = Twitter::GetUserLookup .call(access_token_data)
+    user_info = Twitter::GetUserLookup.call(access_token_data)
 
     return Failure result: user_info.data if user_info.failure?
 

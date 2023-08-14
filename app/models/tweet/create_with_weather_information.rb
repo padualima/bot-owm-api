@@ -21,24 +21,22 @@ class Tweet::CreateWithWeatherInformation < ::Micro::Case
   def validate_location_attributes
     errors = {}
 
-    unless lat && lon || location_name.present?
-      errors[:location_missing] = "params location is missing"
+    if [lat, lon, location_name].all?(&:blank?)
+      errors[:location_missing] = 'params location is missing'
+    elsif lat.present? || lon.present?
+      errors[:lat] = 'latitude is not valid' unless valid_lat?(lat)
+      errors[:lon] = 'longitude is not valid' unless valid_lon?(lon)
     else
-      if lat && lon
-        errors[:lat] = "latitude is not valid" unless valid_lat?(lat)
-        errors[:lon] = "longitude is not valid" unless valid_lon?(lon)
-      end
-
-      errors[:location_name] = "location name not found" if geocoder_location.nil?
+      errors[:location] = "location is not found" if geocoder_location.blank?
     end
 
-    return Success result: { geocoder_location: @geocoder_location } if errors.blank?
+    return Success result: { location: geocoder_location } if errors.blank?
 
     Failure result: { message: ErrorSerializer.new(errors.values, 422) }
   end
 
-  def set_geocoder_coordinates(geocoder_location:, **)
-    lat, lon = geocoder_location.coordinates
+  def set_geocoder_coordinates(location:, **)
+    lat, lon = location.coordinates
 
     Success result: { lat: lat, lon: lon }
   end
@@ -47,8 +45,10 @@ class Tweet::CreateWithWeatherInformation < ::Micro::Case
     Success result: { current_weather: OpenWeatherMap::CurrentWeatherInformation.call(lat:, lon:) }
   end
 
-  def prepare_data_weather_information(geocoder_location:, current_weather:, data: {}, **)
-    data.merge!(current_weather.data, 'city' => geocoder_location.city)
+  def prepare_data_weather_information(location:, current_weather:, data: {}, **)
+    city = location.city || location.data['name']
+
+    data.merge!(current_weather.data, 'city' => city)
 
     Success result: { weather_information: data }
   end
@@ -80,19 +80,23 @@ class Tweet::CreateWithWeatherInformation < ::Micro::Case
   def valid_lon?(lon) = lon.to_s.match?(/^-?((?:1[0-7]|[1-9])?\d(?:\.\d{1,})?|180(?:\.0{1,})?)$/)
 
   def geocoder_location
-    @geocoder_location ||=
-      if location_name.present?
-        geocoder_search_by_name(location_name)
-      else
-        geocoder_search([lat.to_f, lon.to_f])[0]
-      end
+    @geocoder_location ||= if location_name.present?
+      geocoder_search_by_name(location_name)
+    else
+      geocoder_search([lat.to_f, lon.to_f])[0]
+    end
   end
 
   def geocoder_search_by_name(name)
-    available_types = %w[administrative arts_centre city village]
-    geocoder_search(name).select do |g|
-      g.type == available_types[0] && g.city.present? || available_types.include?(g.type)
-    end[0]
+    locations = geocoder_search(name)
+
+    return unless locations.present?
+
+    geocoder_search(name).find do |location|
+      regex = /#{Regexp.escape(name)}/i
+
+      (location.city =~ regex).zero? || (location.data['name'] =~ regex).zero?
+    end
   end
 
   def geocoder_search(input) = Geocoder.search(input)

@@ -3,9 +3,7 @@
 module V1
   class SessionsController < ApiController
     def authorize
-      authorize_url = Clients::Twitter::OAuth2.new.authorize_url
-
-      render json: { data: { message: authorize_url } }.to_json
+      render json: { data: { message: OAuth2::Twitter.authorize_url } }.to_json
     end
 
     def callback

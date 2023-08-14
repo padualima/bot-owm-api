@@ -14,6 +14,14 @@ RSpec.configure do |config|
   # By default, the operations defined in spec files are added to the first
   # document below. You can override this behavior by adding a swagger_doc tag to the
   # the root example_group in your specs, e.g. describe '...', swagger_doc: 'v2/swagger.json'
+  config.after do |example|
+    example.metadata[:response][:content] = {
+      'application/json' => {
+        example: response&.body.present? ? JSON.parse(response.body, symbolize_names: true) : ''
+      }
+    } if example.metadata.dig(:response, :content) && defined?(response)
+  end
+
   config.swagger_docs = {
     'v1/swagger.yaml' => {
       openapi: '3.0.1',
