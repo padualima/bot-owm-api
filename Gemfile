@@ -9,6 +9,9 @@ gem "rails", "~> 7.0.4"
 # Use postgresql as the database for Active Record
 gem "pg", "~> 1.1"
 
+# Middleware that will make Rack-based apps CORS compatible.
+gem 'rack-cors', '~> 2.0'
+
 # Use the Puma web server [https://github.com/puma/puma]
 gem "puma", "~> 5.0"
 
@@ -45,6 +48,8 @@ group :development, :test do
   gem 'rspec-rails', '~> 6.0'
   # Set of matchers and helpers to allow you test your APIs responses like a pro.
   gem 'rspec-json_expectations', '~> 2.2'
+  # WebMock allows stubbing HTTP requests and setting expectations on HTTP requests.
+  gem 'webmock', '~> 3.18'
   # factory_bot_rails provides integration between factory_bot and rails 5.0 or newer
   gem 'factory_bot_rails', '~> 6.2'
   # Simple one-liner tests for common Rails functionality

@@ -4,14 +4,15 @@
 #
 # This workflow will install a prebuilt Ruby version, install dependencies, and
 # run tests and linters.
-name: "Ruby on Rails CI"
+name: "Rails Specs"
 on:
   push:
     branches: [ "main" ]
   pull_request:
     branches: [ "main" ]
 jobs:
-  test:
+  rspec-test:
+    name: "RSpec"
     runs-on: ubuntu-latest
     services:
       postgres:
@@ -31,14 +32,16 @@ jobs:
       DATABASE_PASSWORD: postgres
       TWITTER_BASE_URL_V2: https://api.twitter.com/2
       TWITTER_AUTHORIZE_URL: https://twitter.com/i/oauth2/authorize
+      TWITTER_TOKEN_URL: https://api.twitter.com/2/oauth2/token
       TWITTER_CLIENT_ID: YOUR_CLIENT_ID
       TWITTER_CLIENT_SECRET: YOUR_CLIENT_SECRET
       TWITTER_CALLBACK_URL: http://localhost:3000/auths/twitter2/callback
+      TWITTER_SCOPES_AUTH: "tweet.read users.read tweet.write offline.access"
       OPEN_WEATHER_MAP_API_KEY: YOUR_OPEN_WEATHER_MAP_API_KEY
       OPEN_WEATHER_MAP_API_URL: https://api.openweathermap.org
     steps:
       - uses: actions/checkout@v3
-      - name: Install Ruby and gems
+      - name: Install Ruby and Gems
         uses: ruby/setup-ruby@v1
         with:
           ruby-version: '3.2.0'
@@ -49,7 +52,7 @@ jobs:
           gem install bundler
       - name: Set up database schema
         run: bin/rails db:create db:migrate
-      - name: Run tests
+      - name: Run RSpec
         run: |
           bundle install
           bundle exec rspec spec
