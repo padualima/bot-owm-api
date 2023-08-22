@@ -3,9 +3,13 @@
 class Twitter::GetAccessToken < ::Micro::Case
   attribute :state, default: -> value { value.to_s.strip }
   attribute :code, default: -> value { value.to_s.strip }
+  attribute :redirect_uri, default: -> value { value.to_s.strip }
 
   def call!
-    res = OAuth2::Twitter.access_token(state, code)
+    options = {}
+    options[:redirect_uri] = redirect_uri unless redirect_uri.blank?
+
+    res = OAuth2::Twitter.access_token(state, code, **options)
 
     return Success result: res.body if res.status.eql?(200)
 
