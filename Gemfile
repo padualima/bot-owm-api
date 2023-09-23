@@ -37,6 +37,9 @@ gem 'u-case', '~> 4.5.1'
 gem 'rswag-api', '~> 2.8'
 gem 'rswag-ui', '~> 2.8'
 
+# Fast, simple and easy to use JSON:API serialization library (also known as fast_jsonapi).
+gem 'jsonapi-serializer', '~> 2.2'
+
 group :development, :test do
   # See https://guides.rubyonrails.org/debugging_rails_applications.html#debugging-with-the-debug-gem
   gem "debug", platforms: %i[ mri mingw x64_mingw ]
