@@ -3,7 +3,9 @@
 module V1
   class SessionsController < ApiController
     def authorize
-      render json: { data: { message: OAuth2::Twitter.authorize_url } }.to_json
+      authorize_url = OAuth2::Twitter.authorize_url(**authorize_params.to_h)
+
+      render json: { data: { message: authorize_url } }.to_json
     end
 
     def callback
@@ -16,7 +18,11 @@ module V1
     private
 
     def callback_params
-      params.permit(:state, :code)
+      params.permit(:state, :code, :redirect_uri)
+    end
+
+    def authorize_params
+      params.permit(:redirect_uri)
     end
   end
 end

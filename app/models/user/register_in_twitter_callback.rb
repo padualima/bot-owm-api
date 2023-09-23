@@ -3,10 +3,11 @@
 class User::RegisterInTwitterCallback < ::Micro::Case
   attribute :state, default: -> value { value.to_s.strip }
   attribute :code, default: -> value { value.to_s.strip }
+  attribute :redirect_uri, default: -> value { value.to_s.strip }
 
   def call!
     transaction do
-      Twitter::GetAccessToken.call(state:, code:)
+      Twitter::GetAccessToken.call(state:, code:, redirect_uri:)
         .then do |token|
           return Failure result: token.data if token.failure?
 

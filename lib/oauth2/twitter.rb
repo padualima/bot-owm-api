@@ -9,18 +9,19 @@ module OAuth2
   module Twitter
     extend self
 
-    def authorize_url
+    def authorize_url(**options)
       strategy
         .authorize_url(
           state: code_verifier,
           code_challenge: code_challenge,
           scope: scopes,
-          code_challenge_method: 'S256'
+          code_challenge_method: 'S256',
+          **options
         )
     end
 
-    def access_token(state, code)
-      strategy.get_token(code, code_verifier: state, client_id: client.id)
+    def access_token(state, code, **options)
+      strategy.get_token(code, code_verifier: state, client_id: client.id, **options)
     end
 
     private
