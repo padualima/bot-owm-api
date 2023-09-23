@@ -152,12 +152,77 @@ RSpec.describe V1::SessionsController do
           it "return new token" do
             get :callback, params: callback_params
 
-            response_body = response.parsed_body
+            fetch_api_token_event =
+              ApiTokenEvent.find_by(token: response.parsed_body['users']['token'])
+
+            expect(response.parsed_body).to include_json({ users: { token: a_kind_of(String) } })
+            expect(fetch_api_token_event.user.id).to eql(api_token_event.user.id)
+            expect(fetch_api_token_event.id).to eql(api_token_event.id.succ)
+          end
+        end
+      end
+
+      context "when valid authorization code with custom params redirect_uri" do
+        let(:redirect_uri) { 'https://custom_redirect' }
+        let(:callback_params) do
+          { provider: :twitter2, code: code, state: state, redirect_uri: redirect_uri}
+        end
+
+        context "when the user not exist" do
+          before do
+            StubRequest.post(
+              url: TWITTER_BASE_URL,
+              path: 'oauth2/token',
+              response: MockResponse::Twitter::OAuth2.access_token_data
+            )
+
+            StubRequest.get(
+              url: TWITTER_BASE_URL,
+              path: 'users/me',
+              response: MockResponse::Twitter::Users.me_data
+            )
+          end
+
+          it do
+            get :callback, params: callback_params
+
+            expect(response.parsed_body).to include_json({ users: { token: a_kind_of(String) } })
+          end
+
+          it "return a create user and api_token_event" do
+            expect { get :callback, params: callback_params }.to change(User, :count).by(1)
+              .and change(ApiTokenEvent, :count).by(1)
+          end
+        end
+
+        context "when the user already exists" do
+          let(:api_token_event) { create(:api_token_event) }
+          let(:user) { api_token_event.user }
+          let(:new_api_token_event) { build(:api_token_event, user: user) }
+          let(:access_token) { new_api_token_event.access_token }
+
+          before do
+            StubRequest.post(
+              url: TWITTER_BASE_URL,
+              path: 'oauth2/token',
+              response: MockResponse::Twitter::OAuth2
+                .access_token_data(access_token: access_token)
+            )
+
+            StubRequest.get(
+              url: TWITTER_BASE_URL,
+              path: 'users/me',
+              response: MockResponse::Twitter::Users.me_data(id: user.uid)
+            )
+          end
+
+          it "return new token" do
+            get :callback, params: callback_params
 
             fetch_api_token_event =
-              ApiTokenEvent.find_by(token: response_body['users']['token'])
+              ApiTokenEvent.find_by(token: response.parsed_body['users']['token'])
 
-            expect(response_body).to include_json({ users: { token: a_kind_of(String) } })
+            expect(response.parsed_body).to include_json({ users: { token: a_kind_of(String) } })
             expect(fetch_api_token_event.user.id).to eql(api_token_event.user.id)
             expect(fetch_api_token_event.id).to eql(api_token_event.id.succ)
           end

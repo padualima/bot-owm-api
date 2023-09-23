@@ -39,14 +39,41 @@ RSpec.describe OAuth2::Twitter do
   end
 
   describe '#authorize_url' do
-    subject { described_class.authorize_url }
-
     it 'returns the correct authorize URL' do
-      expect(subject).to include('state=example_code_verifier')
-      expect(subject).to include('code_challenge=example_code_challenge')
-      expect(subject).to include('scope=tweet.read+users.read')
-      expect(subject).to include('code_challenge_method=S256')
-      expect(subject).to include("redirect_uri=#{CGI.escape(callback_uri)}")
+      subject = described_class.authorize_url
+
+      expect(subject).to include(
+        "client_id=example_client_id&" \
+        "code_challenge=example_code_challenge&" \
+        "code_challenge_method=S256&" \
+        "redirect_uri=#{CGI.escape(callback_uri)}&" \
+        "response_type=code&" \
+        "scope=tweet.read+users.read&" \
+        "state=example_code_verifier"
+      )
+    end
+
+    it 'returns the custom auth_code authorize URL with options' do
+      redirect_uri = 'https://custom_redirect'
+      scopes = %w[tweet.write offline.access]
+
+      subject = described_class.authorize_url(redirect_uri: redirect_uri, scope: scopes.join(' '))
+
+      expect(subject).to include(
+        "client_id=example_client_id&" \
+        "code_challenge=example_code_challenge&" \
+        "code_challenge_method=S256&" \
+        "redirect_uri=#{CGI.escape(redirect_uri)}&" \
+        "response_type=code&" \
+        "scope=#{scopes.join('+')}&" \
+        "state=example_code_verifier"
+      )
+    end
+
+
+    it 'does not return auth_code authorize URL with options not supported' do
+      expect { described_class.authorize_url('invalid_params') }
+        .to raise_error(ArgumentError, /wrong number of arguments/)
     end
   end
 
