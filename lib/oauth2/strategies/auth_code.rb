@@ -9,26 +9,18 @@ module OAuth2
       def authorize_url(**params)
         validate_params(params, 'client_secret')
 
-        client.authorize_url(build_authorize_params(params))
+        # By default, `client` adds redirect_uri to params. Will be replaced if present in params
+        client.authorize_url(params.merge(response_type: 'code', client_id: client.id).dup)
       end
 
       def get_token(code, **params)
         validate_params(params)
 
-        client.get_token(build_access_token_params(code, params))
+        # By default, `client` adds redirect_uri to params. Will be replaced if present in params
+        client.get_token(params.merge(grant_type: 'authorization_code', code: code).dup)
       end
 
       private
-
-      def build_authorize_params(params = {})
-        # By default, `client` adds redirect_uri to params. Will be replaced if present in params
-        params.merge(response_type: 'code', client_id: client.id).dup
-      end
-
-      def build_access_token_params(code = '', params = {})
-        # By default, `client` adds redirect_uri to params. Will be replaced if present in params
-        params.merge(grant_type: 'authorization_code', code: code).dup
-      end
 
       def validate_params(params = {}, disallowed_param = nil)
         raise ArgumentError, '`params` is expected to be a Hash' unless params.is_a?(Hash)
