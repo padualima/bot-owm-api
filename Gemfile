@@ -40,6 +40,9 @@ gem 'rswag-ui', '~> 2.8'
 # Fast, simple and easy to use JSON:API serialization library (also known as fast_jsonapi).
 gem 'jsonapi-serializer', '~> 2.2'
 
+# Object oriented authorization for Rails applications
+gem 'pundit', '~> 2.3'
+
 group :development, :test do
   # See https://guides.rubyonrails.org/debugging_rails_applications.html#debugging-with-the-debug-gem
   gem "debug", platforms: %i[ mri mingw x64_mingw ]
