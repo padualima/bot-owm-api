@@ -100,13 +100,13 @@ RSpec.describe V1::TweetsController do
 
       context "when token has expired" do
         before do
-          api_token_event.update(expires_in: Time.current - 1.minutes)
+          api_token_event.update_columns(expires_in: Time.current - 1.minutes)
         end
 
         it do
           post :create, params: tweet_params
 
-          expect(response).to have_http_status(:not_found)
+          expect(response).to have_http_status(:unauthorized)
         end
       end
 
@@ -116,7 +116,7 @@ RSpec.describe V1::TweetsController do
         it do
           post :create, params: tweet_params
 
-          expect(response).to have_http_status(:not_found)
+          expect(response).to have_http_status(:unauthorized)
         end
       end
 

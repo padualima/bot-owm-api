@@ -35,7 +35,7 @@ RSpec.describe User, type: :model do
 
     context "when has not a valid token" do
       before do
-        api_token_event.update(expires_in: Time.current)
+        api_token_event.update_columns(expires_in: Time.current)
       end
 
       it "return nil object" do

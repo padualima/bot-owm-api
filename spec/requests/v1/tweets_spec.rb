@@ -74,7 +74,7 @@ RSpec.describe "V1::Tweets", type: :request, swagger_doc: 'v1/swagger.yaml' do
         run_test!
       end
 
-      response(404, 'Token Not Found') do
+      response(401, 'Unauthorized') do
         let(:token) { nil }
         run_test!
       end

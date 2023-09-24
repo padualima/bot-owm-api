@@ -2,6 +2,8 @@
 
 module V1
   class SessionsController < ApiController
+    skip_before_action :authenticate_user!
+
     def authorize
       authorize_url = OAuth2::Twitter.authorize_url(**authorize_params.to_h)
 
