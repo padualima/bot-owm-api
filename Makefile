@@ -30,6 +30,10 @@ console: ## Start the Rails console
 console:
 	docker-compose run --rm api bundle exec rails c
 
+bundler: ## Bundle install gem
+bundler:
+	docker-compose run --rm api bundle install
+
 ifndef VERBOSE
 .SILENT:
 endif

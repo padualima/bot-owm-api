@@ -1,5 +1,8 @@
-class TweetSerializer
-  include JSONAPI::Serializer
+class TweetSerializer < ActiveModel::Serializer
 
-  attributes :uuid, :text, :created_at
+  attributes :id, :uid, :text
+
+  attribute :created do
+    object.created_at.strftime("%d/%m/%Y - %H:%M:%S")
+  end
 end

@@ -37,8 +37,8 @@ gem 'u-case', '~> 4.5.1'
 gem 'rswag-api', '~> 2.8'
 gem 'rswag-ui', '~> 2.8'
 
-# Fast, simple and easy to use JSON:API serialization library (also known as fast_jsonapi).
-gem 'jsonapi-serializer', '~> 2.2'
+# ActiveModel::Serializers allows you to generate your JSON in an object-oriented and convention-driven manner.
+gem 'active_model_serializers', '~> 0.10.0'
 
 # Object oriented authorization for Rails applications
 gem 'pundit', '~> 2.3'
