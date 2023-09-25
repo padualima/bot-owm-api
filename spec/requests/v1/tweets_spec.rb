@@ -7,6 +7,24 @@ RSpec.describe "V1::Tweets", type: :request, swagger_doc: 'v1/swagger.yaml' do
   let(:api_token_event) { create(:api_token_event) }
   let(:token) { api_token_event.token }
   let(:city_coordinates) { { lat: -5.08921, lon: -42.8016 } }
+  let(:Authorization) { "Bearer #{token}" }
+  let(:api_key) { token }
+
+  path '/tweets' do
+    get('index tweets') do
+      tags 'Tweets'
+      produces 'application/json'
+      security [{ bearer_auth: [], api_key: [] }]
+
+      response(200, 'Successful') { run_test! }
+
+      response(401, 'Unauthorized') do
+        let(:token) { '' }
+
+        run_test!
+      end
+    end
+  end
 
   path '/tweets' do
     post('create tweets') do
@@ -26,8 +44,8 @@ RSpec.describe "V1::Tweets", type: :request, swagger_doc: 'v1/swagger.yaml' do
 
       tags 'Tweets'
       produces 'application/json'
+      security [{ bearer_auth: [], api_key: [] }]
 
-      parameter name: :token, in: :query, type: :string, required: true
       parameter name: :location, in: :query,
         schema: {
           type: :object,

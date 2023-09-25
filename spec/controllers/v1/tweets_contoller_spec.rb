@@ -5,8 +5,41 @@ require 'rails_helper'
 RSpec.describe V1::TweetsController do
   let(:api_token_event) { create(:api_token_event) }
   let(:token) { api_token_event.token }
+  let(:api_key) { token }
 
-  describe "POST /create" do
+  describe 'GET /index' do
+    let(:headers) { { Authorization: "Bearer #{api_key}" } }
+
+    it 'returns ok' do
+      tweets = create_list(:tweet, 2, user: api_token_event.user, api_token_event: api_token_event)
+
+      request.headers.merge!(headers)
+
+      get :index
+
+      expect(response).to have_http_status(:ok)
+      expect(response.parsed_body['data']).to eq(MockResponse::Api::Tweet.tweets_as_json(tweets))
+    end
+
+    it 'returns ok with empty list tweets' do
+      request.headers.merge!(headers)
+
+      get :index
+
+      expect(response).to have_http_status(:ok)
+      expect(response.parsed_body['data']).to eq([])
+    end
+
+    it 'returns unauthorized' do
+      get :index
+
+      expect(response).to have_http_status(:unauthorized)
+      expect(response.parsed_body['errors'])
+        .to including({ 'status' => 401, 'detail' => 'Unauthorized Access' })
+    end
+  end
+
+  describe 'POST /create' do
     let(:city_coordinates) { { lat: -5.08921, lon: -42.8016 } }
     let(:city_name) { Faker::Address.city }
     let(:mock_current_wear) do

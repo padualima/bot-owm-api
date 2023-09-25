@@ -1,6 +1,28 @@
 # frozen_string_literal: true
 
 module MockResponse
+  module Api
+    module Tweet
+      extend self
+
+      def tweets_as_json(tweets = [])
+        tweets.map { |tweet| tweet_as_json(tweet) }
+      end
+
+      def tweet_as_json(tweet)
+        {
+          id: tweet.id.to_s,
+          type: 'tweets',
+          attributes: {
+            uid: tweet.uid,
+            text: tweet.text,
+            created: tweet.created_at.strftime("%d/%m/%Y - %H:%M:%S")
+          }
+        }.as_json
+      end
+    end
+  end
+
   module Twitter
     module OAuth2
       extend self

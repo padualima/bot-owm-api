@@ -18,17 +18,19 @@ class ApiController < ApplicationController
   def authenticate_user!
     return current_user if api_token && api_token.valid?
 
-    raise Pundit::NotAuthorizedError, 'Access Unauthorized'
+    raise Pundit::NotAuthorizedError, 'Unauthorized Access'
   end
 
   def current_user
+    return unless api_token
+
     @current_user = api_token.user
   end
 
   # TODO: change api_token method to api_key
   def api_token
     token =
-      if request.headers['Authorization']
+      if request.headers['Authorization'] # TODO: check if will be always camel case format
         request.headers['Authorization'].split.last
       else
         params[:api_key] || params[:token]
