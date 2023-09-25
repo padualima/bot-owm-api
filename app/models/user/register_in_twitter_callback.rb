@@ -48,8 +48,8 @@ class User::RegisterInTwitterCallback < ::Micro::Case
   end
 
   def user_api_token_creation(access_token_data:, user:, **)
-    user.latest_valid_api_token&.update!(expires_in: Time.current)
-
+    # TODO: should check whether it is necessary to invalidate the previous token
+    # user.latest_valid_api_token&.update!(expires_in: Time.current)
     api_token = user.api_token_events.new(access_token_data)
 
     return Success :api_token_valid, result: { api_token: api_token } if api_token.save!

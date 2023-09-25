@@ -2,14 +2,16 @@
 
 module V1
   class TweetsController < ApiController
-    before_action :set_api_token
+    def index
+      render json: policy_scope(Tweet).order(:created_at), each_serializer: TweetSerializer
+    end
 
     def create
-      return head :not_found unless @api_token
-
       input = tweet_params.to_h
       input[:location_name] = input.delete(:name) if input.key?(:name)
 
+      # TODO: use serializer
+      #       status to create 201
       Tweet::CreateWithWeatherInformation
         .call(**input, api_token: @api_token)
         .on_success { |result| render_json({ tweets: { text: result[:tweet].text } }) }
@@ -17,10 +19,6 @@ module V1
     end
 
     private
-
-    def set_api_token
-      @api_token = ApiTokenEvent.by_valid.find_by(token: params[:token])
-    end
 
     def tweet_params
       params.require(:location).permit(:lat, :lon, :name)

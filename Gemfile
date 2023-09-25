@@ -37,6 +37,12 @@ gem 'u-case', '~> 4.5.1'
 gem 'rswag-api', '~> 2.8'
 gem 'rswag-ui', '~> 2.8'
 
+# ActiveModel::Serializers allows you to generate your JSON in an object-oriented and convention-driven manner.
+gem 'active_model_serializers', '~> 0.10.0'
+
+# Object oriented authorization for Rails applications
+gem 'pundit', '~> 2.3'
+
 group :development, :test do
   # See https://guides.rubyonrails.org/debugging_rails_applications.html#debugging-with-the-debug-gem
   gem "debug", platforms: %i[ mri mingw x64_mingw ]

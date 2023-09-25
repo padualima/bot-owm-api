@@ -8,7 +8,7 @@ scope module: :v1, defaults: { format: :json }, constraints: ApiConstraints.new(
     as: :callback,
     constraints: TwitterCallbackConstraints.new
 
-  resources :tweets, only: %i[create]
+  resources :tweets, only: %i[index create]
 end
 
 
