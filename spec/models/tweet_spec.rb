@@ -5,7 +5,7 @@ require 'rails_helper'
 RSpec.describe Tweet, type: :model do
   context "relations" do
     it { should belong_to(:user) }
-    it { should belong_to(:api_token_event) }
+    it { should belong_to(:api_key) }
   end
 
   describe "validations" do
@@ -20,18 +20,18 @@ RSpec.describe Tweet, type: :model do
   end
 
   describe "#expired?" do
-    let(:api_token_event) { build(:api_token_event) }
+    let(:api_key) { build(:api_key) }
 
     context "when valid token" do
-      it { expect(api_token_event).to be_valid }
+      it { expect(api_key).to be_valid }
     end
 
     context "when expired token" do
       before do
-        api_token_event.update(expires_in: Time.current)
+        api_key.update(expires_in: Time.current)
       end
 
-      it { expect(api_token_event).not_to be_valid }
+      it { expect(api_key).not_to be_valid }
     end
   end
 end

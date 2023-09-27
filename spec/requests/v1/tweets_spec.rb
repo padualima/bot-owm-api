@@ -4,11 +4,9 @@ require 'rails_helper'
 require 'swagger_helper'
 
 RSpec.describe "V1::Tweets", type: :request, swagger_doc: 'v1/swagger.yaml' do
-  let(:api_token_event) { create(:api_token_event) }
-  let(:token) { api_token_event.token }
   let(:city_coordinates) { { lat: -5.08921, lon: -42.8016 } }
-  let(:Authorization) { "Bearer #{token}" }
-  let(:api_key) { token }
+  let(:api_key) { create(:api_key).token }
+  let(:Authorization) { "Bearer #{api_key}" }
 
   path '/tweets' do
     get('index tweets') do
@@ -19,7 +17,7 @@ RSpec.describe "V1::Tweets", type: :request, swagger_doc: 'v1/swagger.yaml' do
       response(200, 'Successful') { run_test! }
 
       response(401, 'Unauthorized') do
-        let(:token) { '' }
+        let(:api_key) { '' }
 
         run_test!
       end
@@ -93,7 +91,7 @@ RSpec.describe "V1::Tweets", type: :request, swagger_doc: 'v1/swagger.yaml' do
       end
 
       response(401, 'Unauthorized') do
-        let(:token) { nil }
+        let(:api_key) { nil }
         run_test!
       end
 

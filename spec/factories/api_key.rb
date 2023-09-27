@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 FactoryBot.define do
-  factory :api_token_event do
+  factory :api_key do
     user factory: :user
     token_type { "bearer" }
     expires_in { 7200.minutes.from_now }

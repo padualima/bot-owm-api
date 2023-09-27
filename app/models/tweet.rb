@@ -1,5 +1,5 @@
 class Tweet < ApplicationRecord
-  belongs_to :api_token_event
+  belongs_to :api_key
   belongs_to :user
 
   scope :by_user, ->(user) { where(user_id: user.id) }

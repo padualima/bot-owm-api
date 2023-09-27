@@ -16,7 +16,7 @@ class User::RegisterInTwitterCallback < ::Micro::Case
         .then(apply(:assign_token_and_expires_in))
         .then(apply(:twitter_user_lookup))
         .then(apply(:find_or_initializer_user))
-        .then(apply(:user_api_token_creation))
+        .then(apply(:user_api_key_creator))
     end
   end
 
@@ -47,13 +47,13 @@ class User::RegisterInTwitterCallback < ::Micro::Case
     Success result: { user: User.find_by(uid: user_info['uid']) || User.new(user_info) }
   end
 
-  def user_api_token_creation(access_token_data:, user:, **)
+  def user_api_key_creator(access_token_data:, user:, **)
     # TODO: should check whether it is necessary to invalidate the previous token
-    # user.latest_valid_api_token&.update!(expires_in: Time.current)
-    api_token = user.api_token_events.new(access_token_data)
+    # user.latest_valid_api_key&.update!(expires_in: Time.current)
+    api_key = user.api_keys.new(access_token_data)
 
-    return Success :api_token_valid, result: { api_token: api_token } if api_token.save!
+    return Success :api_key_valid, result: { api_key: api_key } if api_key.save!
 
-    Failure :api_token_invalid, result: { message: api_token.errors.full_messages }
+    Failure :api_key_invalid, result: { message: api_key.errors.full_messages }
   end
 end

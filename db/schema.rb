@@ -10,11 +10,11 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2023_01_25_053613) do
+ActiveRecord::Schema[7.0].define(version: 2023_09_27_190133) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
-  create_table "api_token_events", force: :cascade do |t|
+  create_table "api_keys", force: :cascade do |t|
     t.bigint "user_id", null: false
     t.integer "token_type", null: false
     t.datetime "expires_in", null: false
@@ -24,17 +24,17 @@ ActiveRecord::Schema[7.0].define(version: 2023_01_25_053613) do
     t.string "token", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.index ["user_id"], name: "index_api_token_events_on_user_id"
+    t.index ["user_id"], name: "index_api_keys_on_user_id"
   end
 
   create_table "tweets", force: :cascade do |t|
     t.bigint "user_id", null: false
-    t.bigint "api_token_event_id", null: false
+    t.bigint "api_key_id", null: false
     t.string "uid", null: false
     t.string "text", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.index ["api_token_event_id"], name: "index_tweets_on_api_token_event_id"
+    t.index ["api_key_id"], name: "index_tweets_on_api_key_id"
     t.index ["user_id"], name: "index_tweets_on_user_id"
   end
 
@@ -46,7 +46,7 @@ ActiveRecord::Schema[7.0].define(version: 2023_01_25_053613) do
     t.datetime "updated_at", null: false
   end
 
-  add_foreign_key "api_token_events", "users"
-  add_foreign_key "tweets", "api_token_events"
+  add_foreign_key "api_keys", "users"
+  add_foreign_key "tweets", "api_keys"
   add_foreign_key "tweets", "users"
 end
