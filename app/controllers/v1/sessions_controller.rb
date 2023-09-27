@@ -14,7 +14,7 @@ module V1
       User::RegisterInTwitterCallback
         .call(callback_params.to_h)
         .on_failure { |result| render_json(result[:message], :unprocessable_entity) }
-        .on_success { |result| render_json({ users: { token: result.data[:api_token].token } }) }
+        .on_success { |result| render_json({ users: { token: result.data[:api_key].token } }) }
     end
 
     private

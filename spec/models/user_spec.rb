@@ -4,7 +4,7 @@ require 'rails_helper'
 
 RSpec.describe User, type: :model do
   context "relations" do
-    it { should have_many(:api_token_events) }
+    it { should have_many(:api_keys) }
     it { should have_many(:tweets) }
   end
 
@@ -22,24 +22,24 @@ RSpec.describe User, type: :model do
     it { should allow_value(Faker::Number.number).for(:uid) }
   end
 
-  describe "#latest_valid_api_token" do
-    let(:api_token_event) { create(:api_token_event) }
+  describe "#latest_valid_api_key" do
+    let(:api_key) { create(:api_key) }
 
-    subject { api_token_event.user }
+    subject { api_key.user }
 
     context "when has a valid token" do
       it "return the latest valid api token" do
-        expect(subject.latest_valid_api_token).to eql(api_token_event)
+        expect(subject.latest_valid_api_key).to eql(api_key)
       end
     end
 
     context "when has not a valid token" do
       before do
-        api_token_event.update_columns(expires_in: Time.current)
+        api_key.update_columns(expires_in: Time.current)
       end
 
       it "return nil object" do
-        expect(subject.latest_valid_api_token).to eql(nil)
+        expect(subject.latest_valid_api_key).to eql(nil)
       end
     end
 
@@ -47,7 +47,7 @@ RSpec.describe User, type: :model do
       subject { create(:user) }
 
       it "return nil object" do
-        expect(subject.latest_valid_api_token).to eql(nil)
+        expect(subject.latest_valid_api_key).to eql(nil)
       end
     end
   end

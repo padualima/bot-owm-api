@@ -3,15 +3,14 @@
 require 'rails_helper'
 
 RSpec.describe V1::TweetsController do
-  let(:api_token_event) { create(:api_token_event) }
-  let(:token) { api_token_event.token }
-  let(:api_key) { token }
+  let(:api_key) { create(:api_key) }
+  let(:token) { api_key.token }
 
   describe 'GET /index' do
-    let(:headers) { { Authorization: "Bearer #{api_key}" } }
+    let(:headers) { { Authorization: "Bearer #{token}" } }
 
     it 'returns ok' do
-      tweets = create_list(:tweet, 2, user: api_token_event.user, api_token_event: api_token_event)
+      tweets = create_list(:tweet, 2, user: api_key.user, api_key: api_key)
 
       request.headers.merge!(headers)
 
@@ -133,7 +132,7 @@ RSpec.describe V1::TweetsController do
 
       context "when token has expired" do
         before do
-          api_token_event.update_columns(expires_in: Time.current - 1.minutes)
+          api_key.update_columns(expires_in: Time.current - 1.minutes)
         end
 
         it do

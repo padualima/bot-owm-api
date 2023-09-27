@@ -1,4 +1,4 @@
-class ApiTokenEvent < ApplicationRecord
+class ApiKey < ApplicationRecord
   belongs_to :user
   has_many :tweets
 

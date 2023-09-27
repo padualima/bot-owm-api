@@ -4,7 +4,7 @@ class Tweet::CreateWithWeatherInformation < ::Micro::Case
   attribute :lat
   attribute :lon
   attribute :location_name, default: -> value { value.to_s.strip }
-  attribute :api_token, default: -> value { value if value.is_a?(ApiTokenEvent) }
+  attribute :api_key, default: -> value { value if value.is_a?(ApiKey) }
 
   def call!
     validate_location_attributes
@@ -57,17 +57,17 @@ class Tweet::CreateWithWeatherInformation < ::Micro::Case
     Success result: { text: WeatherStaticTextBuilder.call(weather_information) }
   end
 
-  def publish_tweet(api_token:, text:, **)
-    Twitter::PublishTweet.call(access_token: api_token.access_token, text:)
+  def publish_tweet(api_key:, text:, **)
+    Twitter::PublishTweet.call(access_token: api_key.access_token, text:)
       .on_success { |result| return Success result: { tweet: result['data'] } }
       .on_failure { |result| Failure result: { message: result[:message] } }
   end
 
-  def perform_creation(api_token:, tweet:, **)
+  def perform_creation(api_key:, tweet:, **)
     Tweet
       .create(
-        user_id: api_token.user.id,
-        api_token_event_id: api_token.id,
+        user_id: api_key.user.id,
+        api_key_id: api_key.id,
         uid: tweet['id'],
         text: tweet['text']
       )

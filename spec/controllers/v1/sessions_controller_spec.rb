@@ -122,17 +122,17 @@ RSpec.describe V1::SessionsController do
             expect(response.parsed_body).to include_json({ users: { token: a_kind_of(String) } })
           end
 
-          it "return a create user and api_token_event" do
+          it "return a create user and api_key" do
             expect { get :callback, params: callback_params }.to change(User, :count).by(1)
-              .and change(ApiTokenEvent, :count).by(1)
+              .and change(ApiKey, :count).by(1)
           end
         end
 
         context "when the user already exists" do
-          let(:api_token_event) { create(:api_token_event) }
-          let(:user) { api_token_event.user }
-          let(:new_api_token_event) { build(:api_token_event, user: user) }
-          let(:access_token) { new_api_token_event.access_token }
+          let(:api_key) { create(:api_key) }
+          let(:user) { api_key.user }
+          let(:new_api_key) { build(:api_key, user: user) }
+          let(:access_token) { new_api_key.access_token }
 
           before do
             StubRequest.post(
@@ -152,12 +152,11 @@ RSpec.describe V1::SessionsController do
           it "return new token" do
             get :callback, params: callback_params
 
-            fetch_api_token_event =
-              ApiTokenEvent.find_by(token: response.parsed_body['users']['token'])
+            fetch_api_key = ApiKey.find_by(token: response.parsed_body['users']['token'])
 
             expect(response.parsed_body).to include_json({ users: { token: a_kind_of(String) } })
-            expect(fetch_api_token_event.user.id).to eql(api_token_event.user.id)
-            expect(fetch_api_token_event.id).to eql(api_token_event.id.succ)
+            expect(fetch_api_key.user.id).to eql(api_key.user.id)
+            expect(fetch_api_key.id).to eql(api_key.id.succ)
           end
         end
       end
@@ -189,17 +188,17 @@ RSpec.describe V1::SessionsController do
             expect(response.parsed_body).to include_json({ users: { token: a_kind_of(String) } })
           end
 
-          it "return a create user and api_token_event" do
-            expect { get :callback, params: callback_params }.to change(User, :count).by(1)
-              .and change(ApiTokenEvent, :count).by(1)
+          it "return a create user and api_key" do
+            expect { get :callback, params: callback_params }
+              .to change(User, :count).by(1).and change(ApiKey, :count).by(1)
           end
         end
 
         context "when the user already exists" do
-          let(:api_token_event) { create(:api_token_event) }
-          let(:user) { api_token_event.user }
-          let(:new_api_token_event) { build(:api_token_event, user: user) }
-          let(:access_token) { new_api_token_event.access_token }
+          let(:api_key) { create(:api_key) }
+          let(:user) { api_key.user }
+          let(:new_api_key) { build(:api_key, user: user) }
+          let(:access_token) { new_api_key.access_token }
 
           before do
             StubRequest.post(
@@ -219,12 +218,12 @@ RSpec.describe V1::SessionsController do
           it "return new token" do
             get :callback, params: callback_params
 
-            fetch_api_token_event =
-              ApiTokenEvent.find_by(token: response.parsed_body['users']['token'])
+            fetch_api_key =
+              ApiKey.find_by(token: response.parsed_body['users']['token'])
 
             expect(response.parsed_body).to include_json({ users: { token: a_kind_of(String) } })
-            expect(fetch_api_token_event.user.id).to eql(api_token_event.user.id)
-            expect(fetch_api_token_event.id).to eql(api_token_event.id.succ)
+            expect(fetch_api_key.user.id).to eql(api_key.user.id)
+            expect(fetch_api_key.id).to eql(api_key.id.succ)
           end
         end
       end

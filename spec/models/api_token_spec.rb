@@ -2,14 +2,14 @@
 
 require 'rails_helper'
 
-RSpec.describe ApiTokenEvent, type: :model do
+RSpec.describe ApiKey, type: :model do
   context "relations" do
     it { should belong_to(:user) }
     it { should have_many(:tweets) }
   end
 
   describe "validations" do
-    subject { build(:api_token_event) }
+    subject { build(:api_key) }
 
     it { should validate_presence_of(:token_type) }
     it { should validate_presence_of(:expires_in) }

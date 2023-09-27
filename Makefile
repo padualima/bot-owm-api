@@ -34,6 +34,10 @@ bundler: ## Bundle install gem
 bundler:
 	docker-compose run --rm api bundle install
 
+migrate: ## Run database migrate
+migrate:
+	docker-compose run --rm api bundle exec rails db:migrate
+
 ifndef VERBOSE
 .SILENT:
 endif

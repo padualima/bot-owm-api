@@ -2,8 +2,8 @@
 
 FactoryBot.define do
   factory :tweet do
-    api_token_event factory: :api_token_event
-    user { self.api_token_event.user }
+    api_key factory: :api_key
+    user { self.api_key.user }
     uid { SecureRandom.rand(100000..900000).to_s }
     text { |n| "This is text #{n.uid}"}
   end
